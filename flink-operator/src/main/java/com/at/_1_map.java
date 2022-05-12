@@ -14,6 +14,8 @@ public class _1_map {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
+        // ncat -lk 8090
+
         DataStreamSource<String> socketTextStream = env.socketTextStream("127.0.0.1", 8090);
 
         SingleOutputStreamOperator<Integer> streamOperator = socketTextStream.map(new MapFunction<String, Integer>() {
