@@ -5,6 +5,8 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
+import java.util.Arrays;
+
 /**
  * @create 2022-05-12
  */
@@ -14,18 +16,18 @@ public class _1_map {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        // ncat -lk 8090
+        DataStreamSource<Integer> streamSource = env.fromCollection(Arrays.asList(1, 2, 3, 4, 5));
 
-        DataStreamSource<String> socketTextStream = env.socketTextStream("127.0.0.1", 8090);
-
-        SingleOutputStreamOperator<Integer> streamOperator = socketTextStream.map(new MapFunction<String, Integer>() {
+        SingleOutputStreamOperator<Integer> streamOperator = streamSource.map(new MapFunction<Integer, Integer>() {
             @Override
-            public Integer map(String s) throws Exception {
-                return Integer.parseInt(s) + 10;
+            public Integer map(Integer i) throws Exception {
+                return i + 10;
             }
         });
 
         streamOperator.print();
+
+
 
         env.execute();
 
