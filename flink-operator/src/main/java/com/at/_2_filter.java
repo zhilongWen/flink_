@@ -1,9 +1,12 @@
 package com.at;
 
 import org.apache.flink.api.common.functions.FilterFunction;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+
+import java.util.Arrays;
 
 
 /**
@@ -15,20 +18,18 @@ public class _2_filter {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        DataStreamSource<String> streamSource = env.socketTextStream("127.0.0.1", 8090);
+        DataStreamSource<Integer> streamSource = env.fromCollection(Arrays.asList(1, 2, 3, 4, 5));
 
-        SingleOutputStreamOperator<String> streamOperator = streamSource.filter(new FilterFunction<String>() {
+        SingleOutputStreamOperator<Integer> streamOperator = streamSource.filter(new FilterFunction<Integer>() {
             @Override
-            public boolean filter(String s) throws Exception {
-                return !s.equals("a");
+            public boolean filter(Integer i) throws Exception {
+                return i != 1;
             }
         });
 
         streamOperator.print();
 
-
         env.execute();
-
 
     }
 

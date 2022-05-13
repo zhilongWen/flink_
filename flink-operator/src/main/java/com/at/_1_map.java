@@ -27,8 +27,6 @@ public class _1_map {
 
         streamOperator.print();
 
-
-
         env.execute();
 
     }
