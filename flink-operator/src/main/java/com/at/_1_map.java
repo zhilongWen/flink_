@@ -29,6 +29,8 @@ public class _1_map {
 
         env.execute();
 
+        System.in.read();
+
     }
 
 }
