@@ -1,10 +1,13 @@
 package com.at;
 
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
+
+import java.util.Arrays;
 
 /**
  * @create 2022-05-12
@@ -15,19 +18,16 @@ public class _3_flatmap {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        DataStreamSource<String> streamSource = env.socketTextStream("127.0.0.1", 8090);
+        DataStreamSource<Integer> streamSource = env.fromCollection(Arrays.asList(1, 2, 3, 4, 5));
 
-        SingleOutputStreamOperator<String> streamOperator = streamSource.flatMap(new FlatMapFunction<String, String>() {
+        SingleOutputStreamOperator<Integer> streamOperator = streamSource.flatMap(new FlatMapFunction<Integer, Integer>() {
             @Override
-            public void flatMap(String s, Collector<String> collector) throws Exception {
+            public void flatMap(Integer elem, Collector<Integer> collector) throws Exception {
 
-                String[] elems = s.split(" ");
-
-                for (String elem : elems) {
-
-                    if (!elem.equals("a")) {
-                        collector.collect(elem + " Flink");
-                    }
+                if (elem == 1) {
+                    collector.collect(elem);
+                } else {
+                    collector.collect(elem + 10);
                 }
             }
         });
