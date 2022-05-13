@@ -1,6 +1,7 @@
 package com.at;
 
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -21,24 +22,31 @@ public class _5_reduce {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        DataStreamSource<String> streamSource = env.socketTextStream("127.0.0.1", 8090);
+        env.setParallelism(1);
+
+        DataStreamSource<Integer> streamSource = env.fromCollection(Arrays.asList(1, 2, 3, 4, 5, 1, 5));
 
 
-        SingleOutputStreamOperator<Tuple2<String, Integer>> streamOperator = streamSource.flatMap(new FlatMapFunction<String, Tuple2<String, Integer>>() {
+        SingleOutputStreamOperator<Tuple2<String, Integer>> streamOperator = streamSource.map(new MapFunction<Integer, Tuple2<String, Integer>>() {
             @Override
-            public void flatMap(String s, Collector<Tuple2<String, Integer>> collector) throws Exception {
-                Arrays.stream(s.split(" ")).forEach(elem -> collector.collect(Tuple2.of(elem, 1)));
+            public Tuple2<String, Integer> map(Integer elem) throws Exception {
+                if (elem == 1) {
+                    return Tuple2.of("w", elem);
+                } else {
+                    return Tuple2.of("o", elem);
+                }
             }
         });
 
         KeyedStream<Tuple2<String, Integer>, String> keyedStream = streamOperator.keyBy(new KeySelector<Tuple2<String, Integer>, String>() {
             @Override
-            public String getKey(Tuple2<String, Integer> tuple2) throws Exception {
-                return tuple2.f0;
+            public String getKey(Tuple2<String, Integer> elem) throws Exception {
+                return elem.f0;
             }
         });
 
-        SingleOutputStreamOperator<Tuple2<String, Integer>> reduceStream = keyedStream.reduce(new ReduceFunction<Tuple2<String, Integer>>() {
+        // reduce
+        keyedStream.reduce(new ReduceFunction<Tuple2<String, Integer>>() {
             @Override
             public Tuple2<String, Integer> reduce(Tuple2<String, Integer> t1, Tuple2<String, Integer> t2) throws Exception {
                 return Tuple2.of(t1.f0, t1.f1 + t2.f1);
@@ -46,11 +54,22 @@ public class _5_reduce {
         });
 
 
+        // min 在输入流上对指定的字段求最小值
+        keyedStream.min(1).print();
 
-        reduceStream.print();
+        // minBy 在输入流上针对指定字段求最小值，并返回包含当前观察到的最小值的事件
+        keyedStream.minBy(1);
+
+        // max 在输入流上对指定的字段求最大值
+        keyedStream.max(1);
+
+        // 在输入流上针对指定字段求最大值，并返回包含当前观察到的最大值的事件
+        keyedStream.maxBy(0);
+
+        // sum 在输入流上对指定的字段做滚动相加操作
+        keyedStream.sum(1);
 
         env.execute();
 
     }
-
 }

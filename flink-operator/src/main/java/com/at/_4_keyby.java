@@ -1,6 +1,7 @@
 package com.at;
 
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -20,20 +21,26 @@ public class _4_keyby {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        DataStreamSource<String> streamSource = env.socketTextStream("127.0.0.1", 8090);
+        env.setParallelism(1);
+
+        DataStreamSource<Integer> streamSource = env.fromCollection(Arrays.asList(1, 2, 3, 4, 5, 1, 5));
 
 
-        SingleOutputStreamOperator<Tuple2<String, Integer>> streamOperator = streamSource.flatMap(new FlatMapFunction<String, Tuple2<String, Integer>>() {
+        SingleOutputStreamOperator<Tuple2<String, Integer>> streamOperator = streamSource.map(new MapFunction<Integer, Tuple2<String, Integer>>() {
             @Override
-            public void flatMap(String s, Collector<Tuple2<String, Integer>> collector) throws Exception {
-                Arrays.stream(s.split(" ")).forEach(elem -> collector.collect(Tuple2.of(elem, 1)));
+            public Tuple2<String, Integer> map(Integer elem) throws Exception {
+                if (elem == 1) {
+                    return Tuple2.of("w", elem);
+                } else {
+                    return Tuple2.of("o", elem);
+                }
             }
         });
 
         KeyedStream<Tuple2<String, Integer>, String> keyedStream = streamOperator.keyBy(new KeySelector<Tuple2<String, Integer>, String>() {
             @Override
-            public String getKey(Tuple2<String, Integer> tuple2) throws Exception {
-                return tuple2.f0;
+            public String getKey(Tuple2<String, Integer> elem) throws Exception {
+                return elem.f0;
             }
         });
 
