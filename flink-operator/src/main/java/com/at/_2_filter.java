@@ -20,6 +20,7 @@ public class _2_filter {
 
         DataStreamSource<Integer> streamSource = env.fromCollection(Arrays.asList(1, 2, 3, 4, 5));
 
+        // filter  针对流中的每一个元素，输出零个或一个元素
         SingleOutputStreamOperator<Integer> streamOperator = streamSource.filter(new FilterFunction<Integer>() {
             @Override
             public boolean filter(Integer i) throws Exception {
