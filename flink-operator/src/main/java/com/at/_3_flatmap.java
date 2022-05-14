@@ -1,10 +1,7 @@
 package com.at;
 
-import org.apache.flink.api.common.functions.FilterFunction;
-import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
 
@@ -15,7 +12,7 @@ import java.util.Arrays;
  */
 public class _3_flatmap {
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
@@ -45,7 +42,7 @@ public class _3_flatmap {
                     if (elem % 2 == 1) {
                         collector.collect(elem);
                         collector.collect(elem);
-                    } else {
+                    } else if (elem % 3 == 1) {
                         collector.collect(elem + 10);
                     }
                 })
