@@ -18,6 +18,7 @@ public class _1_map {
 
         DataStreamSource<Integer> streamSource = env.fromCollection(Arrays.asList(1, 2, 3, 4, 5));
 
+        // map: 针对流中的每一个元素，输出一个元素
         SingleOutputStreamOperator<Integer> streamOperator = streamSource.map(new MapFunction<Integer, Integer>() {
             @Override
             public Integer map(Integer i) throws Exception {
@@ -28,8 +29,6 @@ public class _1_map {
         streamOperator.print();
 
         env.execute();
-
-        System.in.read();
 
     }
 
