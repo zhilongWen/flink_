@@ -11,7 +11,6 @@ public class _7_rich_function {
 
     public static void main(String[] args) throws Exception {
 
-
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         env.setParallelism(1);
@@ -43,7 +42,6 @@ public class _7_rich_function {
 
 
         env.execute();
-
 
     }
 

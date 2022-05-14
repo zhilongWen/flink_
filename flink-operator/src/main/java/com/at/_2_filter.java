@@ -14,19 +14,21 @@ import java.util.Arrays;
  */
 public class _2_filter {
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         DataStreamSource<Integer> streamSource = env.fromCollection(Arrays.asList(1, 2, 3, 4, 5));
 
         // filter  针对流中的每一个元素，输出零个或一个元素
-        SingleOutputStreamOperator<Integer> streamOperator = streamSource.filter(new FilterFunction<Integer>() {
-            @Override
-            public boolean filter(Integer i) throws Exception {
-                return i != 1;
-            }
-        });
+        SingleOutputStreamOperator<Integer> streamOperator = streamSource
+                /// filter 算子输入和输出的类型是一样的，所以只有一个泛型
+                .filter(new FilterFunction<Integer>() {
+                    @Override
+                    public boolean filter(Integer i) throws Exception {
+                        return i % 2 == 1;
+                    }
+                });
 
         streamOperator.print();
 

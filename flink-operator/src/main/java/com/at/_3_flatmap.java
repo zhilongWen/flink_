@@ -1,5 +1,6 @@
 package com.at;
 
+import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -23,30 +24,57 @@ public class _3_flatmap {
         // DataStream → DataStream
         // flatMap：针对流中的每一个元素，输出零个、一个或多个 元素
         // flatMap 是 map 与 filter 的泛化  可以实现 map 与 filter 的功能
-//        streamSource.flatMap(new FlatMapFunction<Integer, Integer>() {
-//            @Override
-//            public void flatMap(Integer elem, Collector<Integer> collector) throws Exception {
-//
-//                if (elem % 2 == 1) {
-//                    collector.collect(elem);
-//                    collector.collect(elem);
-//                } else {
-//                    collector.collect(elem + 10);
-//                }
-//            }
-//        }).print();
 
 
+        // 实现 filter 功能 过滤出奇数
         streamSource
-                .flatMap((Integer elem, Collector<Integer> collector) -> {
-                    if (elem % 2 == 1) {
-                        collector.collect(elem);
-                        collector.collect(elem);
-                    } else if (elem % 3 == 1) {
-                        collector.collect(elem + 10);
+                .flatMap(new FlatMapFunction<Integer, Integer>() {
+                    @Override
+                    public void flatMap(Integer value, Collector<Integer> out) throws Exception {
+                        if (value % 2 == 1) {
+                            out.collect(value);
+                        }
                     }
                 })
-                .returns(Types.INT)
+                .print();
+
+        // 实现 map 功能 求平方
+        streamSource
+                .flatMap(new FlatMapFunction<Integer, Integer>() {
+                    @Override
+                    public void flatMap(Integer value, Collector<Integer> out) throws Exception {
+                        out.collect(value * value);
+                    }
+                })
+                .print();
+
+
+        // 组合
+        streamSource
+                .flatMap(new FlatMapFunction<Integer, Integer>() {
+                    @Override
+                    public void flatMap(Integer value, Collector<Integer> out) throws Exception {
+                        if (value % 2 == 1) {
+                            out.collect(value);
+                        } else if (value % 3 == 0) {
+                            out.collect(value);
+                            out.collect(value);
+                        }
+                    }
+                })
+                .print();
+
+        streamSource
+                // 泛型擦除
+                .flatMap((Integer value, Collector<Integer> out) -> {
+                    if (value % 2 == 1) {
+                        out.collect(value);
+                    } else if (value % 3 == 0) {
+                        out.collect(value);
+                        out.collect(value);
+                    }
+                })
+                .returns(Types.INT) // 显示指定类型
                 .print();
 
 
