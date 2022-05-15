@@ -26,7 +26,7 @@ public class ClickSource implements SourceFunction<Event> {
                             Calendar.getInstance().getTimeInMillis()
                     )
             );
-            Thread.sleep(1000L);
+            Thread.sleep(100L);
         }
     }
 
