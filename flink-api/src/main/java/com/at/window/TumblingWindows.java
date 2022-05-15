@@ -52,6 +52,7 @@ public class TumblingWindows {
 //                                )
 //                )
                 .keyBy(event -> event.user)
+                // 窗口大小 5s
                 .window(TumblingProcessingTimeWindows.of(Time.seconds(5)))
 //                .window(TumblingEventTimeWindows.of(Time.seconds(5)))
 
