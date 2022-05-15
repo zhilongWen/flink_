@@ -12,7 +12,7 @@ import java.util.EventListener;
 /**
  * @create 2022-05-15
  */
-public class WatermarkConfig {
+public class AssignWatermark {
 
     public static void main(String[] args) throws Exception {
 
