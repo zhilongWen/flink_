@@ -29,7 +29,7 @@ public class AssignWatermark {
                 // 插入水位线的逻辑
                 .assignTimestampsAndWatermarks(
                         // forBoundedOutOfOrderness 针对乱序流插入水位线
-                        // 最大延迟时间设置为5s
+                        // 最大延迟时间设置为 5s
                         // 默认200ms的机器时间插入一个水位线
                         // 水位线 = 观察到的元素中的最大时间戳 - 最大延迟时间 - 1ms
                         WatermarkStrategy
