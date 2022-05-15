@@ -1,11 +1,11 @@
-package com.at.shuffle;
+package com.at.repartition;
 
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 /**
  * @create 2022-05-15
  */
-public class ShuffleOperator {
+public class RepartitionOperator {
 
 
 //    shuffle 方法将数据随机的分配到下游算子的并行任务中去
