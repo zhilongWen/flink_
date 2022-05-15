@@ -1,4 +1,4 @@
-package com.at;
+package com.at.operators;
 
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;

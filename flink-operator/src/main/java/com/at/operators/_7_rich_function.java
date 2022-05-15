@@ -1,4 +1,4 @@
-package com.at;
+package com.at.operators;
 
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
