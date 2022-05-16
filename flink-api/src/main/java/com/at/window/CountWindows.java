@@ -57,13 +57,15 @@ public class CountWindows {
 
                         Timestamp win = new Timestamp(context.currentWatermark());
 
-                        int count = 0;
-                        Iterator<Event> iterator = elements.iterator();
+//                        int count = 0;
+//                        Iterator<Event> iterator = elements.iterator();
+//
+//                        while (iterator.hasNext()) {
+//                            iterator.next();
+//                            count++;
+//                        }
 
-                        while (iterator.hasNext()) {
-                            iterator.next();
-                            count++;
-                        }
+                        long count = elements.spliterator().getExactSizeIfKnown();
 
                         String result = String.format("window [ %s ] 窗口中有 %d 条元素", win, count);
 

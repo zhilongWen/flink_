@@ -119,13 +119,15 @@ public class GlobalWindows {
                             @Override
                             public void process(Context context, Iterable<Event> elements, Collector<String> out) throws Exception {
 
-                                int count = 0;
+//                                int count = 0;
+//                                Iterator<Event> iterator = elements.iterator();
+//                                while (iterator.hasNext()){
+//                                    iterator.next();
+//                                    count++;
+//                                }
 
-                                Iterator<Event> iterator = elements.iterator();
-                                while (iterator.hasNext()){
-                                    iterator.next();
-                                    count++;
-                                }
+                                // 获取迭代器中的元素个数
+                                long count = elements.spliterator().getExactSizeIfKnown();
 
                                 out.collect("window [ " + new Timestamp(context.window().maxTimestamp()) + " ] 有 " + count + " 条元素");
 
