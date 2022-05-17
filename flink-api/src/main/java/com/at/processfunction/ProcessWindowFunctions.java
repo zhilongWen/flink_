@@ -68,6 +68,8 @@ public class ProcessWindowFunctions {
                                     // 注册一个窗口结束时的定时器
                                     ctx.registerEventTimeTimer(window.getEnd());
 
+                                    winFirstSeen.update(true);
+
 
                                 }
 
