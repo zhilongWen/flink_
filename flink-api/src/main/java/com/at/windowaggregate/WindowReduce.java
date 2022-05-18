@@ -1,4 +1,4 @@
-package com.at.windowaggrearate;
+package com.at.windowaggregate;
 
 import com.at.source.ClickSource;
 import org.apache.flink.api.common.functions.ReduceFunction;
