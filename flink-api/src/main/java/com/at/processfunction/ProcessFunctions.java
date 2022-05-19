@@ -30,6 +30,8 @@ public class ProcessFunctions {
 
         env.setParallelism(1);
 
+        // ProcessFunction 不能使用 状态变量 不能使用 onTimer 编译会出错
+
         // 求平均值  实现 map - reduce
 
         DataStreamSource<Integer> sourceStream = env
