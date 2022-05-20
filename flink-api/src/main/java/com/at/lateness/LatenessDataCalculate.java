@@ -1,7 +1,6 @@
 package com.at.lateness;
 
-import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
-import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.eventtime.*;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
@@ -55,17 +54,50 @@ public class LatenessDataCalculate {
                         return Tuple2.of(elems[0], Long.parseLong(elems[1]) * 1000L);
                     }
                 })
+//                .assignTimestampsAndWatermarks(
+//                        WatermarkStrategy
+//                                .<Tuple2<String, Long>>forBoundedOutOfOrderness(Duration.ofSeconds(5l))
+//                                .withTimestampAssigner(
+//                                        new SerializableTimestampAssigner<Tuple2<String, Long>>() {
+//                                            @Override
+//                                            public long extractTimestamp(Tuple2<String, Long> element, long recordTimestamp) {
+//                                                return element.f1;
+//                                            }
+//                                        }
+//                                )
+//                )
                 .assignTimestampsAndWatermarks(
-                        WatermarkStrategy
-                                .<Tuple2<String, Long>>forBoundedOutOfOrderness(Duration.ofSeconds(5l))
-                                .withTimestampAssigner(
-                                        new SerializableTimestampAssigner<Tuple2<String, Long>>() {
-                                            @Override
-                                            public long extractTimestamp(Tuple2<String, Long> element, long recordTimestamp) {
-                                                return element.f1;
-                                            }
-                                        }
-                                )
+                        new WatermarkStrategy<Tuple2<String, Long>>() {
+
+                            @Override
+                            public TimestampAssigner<Tuple2<String, Long>> createTimestampAssigner(TimestampAssignerSupplier.Context context) {
+                                return new SerializableTimestampAssigner<Tuple2<String, Long>>() {
+                                    @Override
+                                    public long extractTimestamp(Tuple2<String, Long> element, long recordTimestamp) {
+                                        return element.f1;
+                                    }
+                                };
+                            }
+
+                            @Override
+                            public WatermarkGenerator<Tuple2<String, Long>> createWatermarkGenerator(WatermarkGeneratorSupplier.Context context) {
+                                return new WatermarkGenerator<Tuple2<String, Long>>() {
+
+                                    private Long maxLateTime = 5000L;
+                                    private Long maxTs = -Long.MAX_VALUE + maxLateTime + 1L;
+
+                                    @Override
+                                    public void onEvent(Tuple2<String, Long> event, long eventTimestamp, WatermarkOutput output) {
+                                        maxTs = Math.max(maxTs,event.f1);
+                                    }
+
+                                    @Override
+                                    public void onPeriodicEmit(WatermarkOutput output) {
+                                        output.emitWatermark(new Watermark(maxTs - maxLateTime - 1L));
+                                    }
+                                };
+                            }
+                        }
                 )
                 .keyBy(e -> 1)
                 .window(TumblingEventTimeWindows.of(Time.seconds(5)))
