@@ -99,8 +99,6 @@ public class ProcessFunctions {
 //                .print("processfunction:");
 
 
-
-
         // ProcessFunction 不能使用 状态变量 不能使用 onTimer 编译会出错
         sourceStream
                 .process(new ProcessFunction<Integer, String>() {
