@@ -69,7 +69,7 @@ public class MapStates {
                                 if (!avgPagePv.contains(value.url)) {
                                     avgPagePv.put(value.url, 1L);
                                 } else {
-                                    avgPagePv.put(value.url, avgPagePv.get(value.url));
+                                    avgPagePv.put(value.url, avgPagePv.get(value.url) + 1L);
                                 }
 
                                 if (timerT.value() == null) {
