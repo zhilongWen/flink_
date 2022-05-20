@@ -55,48 +55,88 @@ public class ProcessFunctions {
 
 
         // 求平均值
+//        sourceStream
+//                .map(elem -> Tuple2.of(elem, 1))
+//                .returns(Types.TUPLE(Types.INT, Types.INT))
+//                .keyBy(elem -> true)
+//                .reduce((r1, r2) -> Tuple2.of(r1.f0 + r2.f0, r1.f1 + r2.f1))
+//                .map(elem -> (double) elem.f0 / elem.f1)
+//                .print("map-reduce:");
+
+
+//        sourceStream
+//                .keyBy(elem -> true)
+//                .process(
+//                        // 第一个泛型输入类型
+//                        // 第二个泛型输出泛型
+//                        new ProcessFunction<Integer, Double>() {
+//
+//                            // 定义一个状态变量 用于统计并计数
+//                            private ValueState<Tuple2<Integer, Integer>> valueAndCountState;
+//
+//                            @Override
+//                            public void open(Configuration parameters) throws Exception {
+//                                super.open(parameters);
+//                                valueAndCountState = getRuntimeContext().getState(
+//                                        new ValueStateDescriptor<Tuple2<Integer, Integer>>("value-and-count-state", Types.TUPLE(Types.INT, Types.INT))
+//                                );
+//                            }
+//
+//                            // 没来一条数据都会调用 processElement 方法
+//                            @Override
+//                            public void processElement(Integer value, Context ctx, Collector<Double> out) throws Exception {
+//
+//                                if (valueAndCountState.value() == null) {
+//                                    valueAndCountState.update(Tuple2.of(value, 1));
+//                                } else {
+//                                    valueAndCountState.update(Tuple2.of(valueAndCountState.value().f0 + value, valueAndCountState.value().f1 + 1));
+//                                }
+//
+//                                out.collect((double) valueAndCountState.value().f0 / valueAndCountState.value().f1);
+//
+//                            }
+//                        })
+//                .print("processfunction:");
+
+
+
+
+        // ProcessFunction 不能使用 状态变量 不能使用 onTimer 编译会出错
         sourceStream
-                .map(elem -> Tuple2.of(elem, 1))
-                .returns(Types.TUPLE(Types.INT, Types.INT))
-                .keyBy(elem -> true)
-                .reduce((r1, r2) -> Tuple2.of(r1.f0 + r2.f0, r1.f1 + r2.f1))
-                .map(elem -> (double) elem.f0 / elem.f1)
-                .print("map-reduce:");
+                .process(new ProcessFunction<Integer, String>() {
 
+                    private ValueState<Tuple2<Integer, Integer>> avgState;
 
-        sourceStream
-                .keyBy(elem -> true)
-                .process(
-                        // 第一个泛型输入类型
-                        // 第二个泛型输出泛型
-                        new ProcessFunction<Integer, Double>() {
+                    @Override
+                    public void open(Configuration parameters) throws Exception {
+                        super.open(parameters);
+                        avgState = getRuntimeContext().getState(new ValueStateDescriptor<Tuple2<Integer, Integer>>("avg-state", Types.TUPLE(Types.INT, Types.INT)));
+                    }
 
-                            // 定义一个状态变量 用于统计并计数
-                            private ValueState<Tuple2<Integer, Integer>> valueAndCountState;
+                    @Override
+                    public void processElement(Integer value, Context ctx, Collector<String> out) throws Exception {
 
-                            @Override
-                            public void open(Configuration parameters) throws Exception {
-                                super.open(parameters);
-                                valueAndCountState = getRuntimeContext().getState(
-                                        new ValueStateDescriptor<Tuple2<Integer, Integer>>("value-and-count-state", Types.TUPLE(Types.INT, Types.INT))
-                                );
-                            }
+                        if (avgState.value() == null) {
+                            avgState.update(Tuple2.of(value, 1));
+                        } else {
+                            avgState.update(Tuple2.of(avgState.value().f0 + value, avgState.value().f1 + 1));
+                        }
 
-                            // 没来一条数据都会调用 processElement 方法
-                            @Override
-                            public void processElement(Integer value, Context ctx, Collector<Double> out) throws Exception {
+                        ctx.timerService().registerProcessingTimeTimer(ctx.timerService().currentProcessingTime() + 10L);
 
-                                if (valueAndCountState.value() == null) {
-                                    valueAndCountState.update(Tuple2.of(value, 1));
-                                } else {
-                                    valueAndCountState.update(Tuple2.of(valueAndCountState.value().f0 + value, valueAndCountState.value().f1 + 1));
-                                }
+                    }
 
-                                out.collect((double) valueAndCountState.value().f0 / valueAndCountState.value().f1);
+                    @Override
+                    public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out) throws Exception {
+                        super.onTimer(timestamp, ctx, out);
 
-                            }
-                        })
-                .print("processfunction:");
+                        ctx.timerService().registerProcessingTimeTimer(timestamp + 10L);
+
+                        out.collect("avg = " + ((double) avgState.value().f1 / avgState.value().f0));
+
+                    }
+                })
+                .print("avg：");
 
 
         env.execute();
