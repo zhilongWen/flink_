@@ -33,7 +33,7 @@
 //
 //
 //        env.enableCheckpointing(5000, CheckpointingMode.EXACTLY_ONCE);
-////        env.setStateBackend(new FsStateBackend("file://D:\\workspace\\flink_\\flink-api\\files\\sf"));
+//        env.setStateBackend(new FsStateBackend("file:///D:\\workspace\\flink_\\flink-api\\ck"));
 //        env.setRestartStrategy(RestartStrategies.noRestart());
 //
 //        Properties props = new Properties();
