@@ -29,6 +29,7 @@ public class JoinConnect {
         // connect  联结两条流
         // 1. 只能连结两条流
         // 2. 两条流中元素类型可以不同
+        // FIFO 原则
 
 //        clickStream
 //                .connect(ruleStream)
