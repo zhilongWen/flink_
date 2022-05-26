@@ -1,5 +1,6 @@
 package org.apache.flink.streaming.examples.wordcount;
 
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -18,7 +19,13 @@ public class WordCount {
 		env.fromElements("hello world", "hello world")
 			.flatMap(new Tokenizer())
 			.setParallelism(1)
-			.filter(r -> r.f0.equals("hello"))
+			.filter(new FilterFunction<Tuple2<String, Integer>>() {
+				@Override
+				public boolean filter(Tuple2<String, Integer> value) throws Exception {
+					boolean hello = value.f0.equals("hello");
+					return hello;
+				}
+			})
 			.setParallelism(2)
 			.keyBy(r -> r.f0)
 			.reduce(

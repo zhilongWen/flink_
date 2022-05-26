@@ -10,16 +10,23 @@ import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
+import org.apache.flink.metrics.MetricGroup;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.operators.StreamingRuntimeContext;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumerBase;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
+import org.apache.flink.streaming.connectors.kafka.config.OffsetCommitMode;
+import org.apache.flink.streaming.connectors.kafka.internals.*;
 import org.apache.flink.util.Collector;
+import org.apache.flink.util.SerializedValue;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -45,6 +52,36 @@ public class SourceFromKafka {
         properties.setProperty("auto.offset.reset", "latest");
 //        FlinkKafkaConsumer<String> kafkaConsumer = new FlinkKafkaConsumer<>("test-topic", new SimpleStringSchema(), properties);
 //        env.addSource(kafkaConsumer).print();
+
+
+        FlinkKafkaConsumerBase<String> stringFlinkKafkaConsumerBase = new FlinkKafkaConsumerBase<String>(
+                Arrays.asList("test-group"),
+                null,
+                new KafkaDeserializationSchemaWrapper<>(new SimpleStringSchema()),
+                1L,
+                true
+        ) {
+            @Override
+            protected AbstractPartitionDiscoverer createPartitionDiscoverer(KafkaTopicsDescriptor topicsDescriptor, int indexOfThisSubtask, int numParallelSubtasks) {
+                return null;
+            }
+
+            @Override
+            protected boolean getIsAutoCommitEnabled() {
+                return false;
+            }
+
+            @Override
+            protected Map<KafkaTopicPartition, Long> fetchOffsetsWithTimestamp(Collection collection, long timestamp) {
+                return null;
+            }
+
+            @Override
+            protected AbstractFetcher createFetcher(SourceContext sourceContext, Map subscribedPartitionsToStartOffsets, SerializedValue watermarkStrategy, StreamingRuntimeContext runtimeContext, OffsetCommitMode offsetCommitMode, MetricGroup kafkaMetricGroup, boolean useMetrics) throws Exception {
+                return null;
+            }
+        };
+
 
 
 

@@ -3,9 +3,11 @@ package com.at;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
+import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.metrics.Counter;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -19,7 +21,7 @@ import java.util.Arrays;
  */
 public class WC {
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 //        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration());
@@ -28,12 +30,40 @@ public class WC {
 
         DataStreamSource<String> streamSource = env.socketTextStream("127.0.0.1", 8099);
 
-        SingleOutputStreamOperator<Tuple2<String, Integer>> streamOperator = streamSource.flatMap(new FlatMapFunction<String, Tuple2<String, Integer>>() {
+//        SingleOutputStreamOperator<Tuple2<String, Integer>> streamOperator = streamSource.flatMap(new FlatMapFunction<String, Tuple2<String, Integer>>() {
+//            @Override
+//            public void flatMap(String s, Collector<Tuple2<String, Integer>> collector) throws Exception {
+//
+//                Arrays.stream(s.split(" ")).forEach(elem -> collector.collect(Tuple2.of(elem,1)));
+//
+//            }
+//        });
+
+
+        SingleOutputStreamOperator<Tuple2<String, Integer>> streamOperator = streamSource.flatMap(new RichFlatMapFunction<String, Tuple2<String, Integer>>() {
+
+            private transient Counter inCounter;
+            private transient Counter outCounter;
+
             @Override
-            public void flatMap(String s, Collector<Tuple2<String, Integer>> collector) throws Exception {
+            public void open(Configuration parameters) throws Exception {
+                super.open(parameters);
+                inCounter = getRuntimeContext()
+                        .getMetricGroup()
+                        .counter("MyInCounter");
 
-                Arrays.stream(s.split(" ")).forEach(elem -> collector.collect(Tuple2.of(elem,1)));
+                outCounter = getRuntimeContext()
+                        .getMetricGroup()
+                        .counter("MyOutCounter");
+            }
 
+            @Override
+            public void flatMap(String s, Collector<Tuple2<String, Integer>> out) throws Exception {
+//                inCounter.inc();
+                Arrays.stream(s.split(" ")).forEach(elem -> {
+//                    outCounter.inc();
+                    out.collect(Tuple2.of(elem, 1));
+                });
             }
         });
 
@@ -51,7 +81,7 @@ public class WC {
             }
         });
 
-        reduceStream.print();
+        reduceStream.print("res：");
 
         env.execute();
 
