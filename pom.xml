@@ -14,7 +14,6 @@
         <module>flink-case</module>
         <module>flink-libraries</module>
         <module>flink-wc</module>
-        <module>flink-connections</module>
     </modules>
 
     <properties>
