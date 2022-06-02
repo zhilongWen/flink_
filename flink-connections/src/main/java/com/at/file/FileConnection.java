@@ -98,8 +98,60 @@ public class FileConnection {
 //                + ")")
 //                .print();
 //
-        tableEnv.executeSql("SELECT\n"
-                + "    *\n"
+//        tableEnv.executeSql("SELECT\n"
+//                + "    *\n"
+//                + "FROM \n"
+//                + "(\n"
+//                + "    SELECT\n"
+//                + "        *,\n"
+//                + "        ROW_NUMBER() OVER(PARTITION BY window_end ORDER BY item_count DESC) AS row_num\n"
+//                + "    FROM \n"
+//                + "    (\n"
+//                + "        SELECT\n"
+//                + "            item_id,\n"
+//                + "            COUNT(item_id) as item_count,\n"
+//                + "            window_start,\n"
+//                + "            window_end\n"
+//                + "        FROM \n"
+//                + "        TABLE(\n"
+//                + "            HOP(\n"
+//                + "                TABLE pv_view,\n"
+//                + "                DESCRIPTOR(row_time),\n"
+//                + "                INTERVAL '5' MINUTE,\n"
+//                + "                INTERVAL '1' HOUR\n"
+//                + "            )\n"
+//                + "        )\n"
+//                + "        GROUP BY item_id,window_start,window_end\n"
+//                + "    )t\n"
+//                + ")t1\n"
+//                + "WHERE row_num <=3 ")
+//                .print();
+
+
+//        tableEnv.executeSql("SELECT UNIX_TIMESTAMP('2017-11-26 09:05:00.000','yyyy-MM-dd HH:mm:ss.S')").print();
+
+        String sinkSQL = "CREATE TABLE IF NOT EXISTS kafka_upset_sink_tbl(\n"
+                + "    item_id BIGINT,\n"
+                + "    item_count INT,\n"
+                + "    window_start BIGINT,\n"
+                + "    window_end BIGINT,\n"
+                + "    row_num INT,\n"
+                + "    PRIMARY KEY (item_id) NOT ENFORCED\n"
+                + ") WITH (\n"
+                + "    'connector' = 'upsert-kafka',\n"
+                + "    'topic' = 'topN_topic',\n"
+                + "    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',\n"
+                + "    'key.format' = 'json',\n"
+                + "    'value.format' = 'json'\n"
+                + ")\n";
+
+        String insertSQL = "INSERT INTO kafka_upset_sink_tbl\n"
+                + "SELECT\n"
+                + "    CAST(item_id AS BIGINT) AS item_id,\n"
+                + "    CAST(item_count AS INT) AS item_count,\n"
+                + "    UNIX_TIMESTAMP(CAST(window_start AS STRING),'yyyy-MM-dd HH:mm:ss.S')  AS window_start,\n"
+                + "    UNIX_TIMESTAMP(CAST(window_end AS STRING),'yyyy-MM-dd HH:mm:ss.S') AS window_end,\n"
+                + "    CAST(row_num AS INT) AS row_num\n"
                 + "FROM \n"
                 + "(\n"
                 + "    SELECT\n"
@@ -124,10 +176,10 @@ public class FileConnection {
                 + "        GROUP BY item_id,window_start,window_end\n"
                 + "    )t\n"
                 + ")t1\n"
-                + "WHERE row_num <=3 ")
-                .print();
+                + "WHERE row_num <=3\n";
 
-
+        tableEnv.executeSql(sinkSQL);
+        tableEnv.executeSql(insertSQL);
 
         env.execute();
 
