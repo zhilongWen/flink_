@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * @create 2022-06-02
  */
-public class FileConnection {
+public class FileConnectionSQL {
 
 
     /*
@@ -180,6 +180,11 @@ public class FileConnection {
 
         tableEnv.executeSql(sinkSQL);
         tableEnv.executeSql(insertSQL);
+
+
+
+
+
 
         env.execute();
 
