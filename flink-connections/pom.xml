@@ -35,6 +35,12 @@ under the License.
 		<maven.compiler.source>${target.java.version}</maven.compiler.source>
 		<maven.compiler.target>${target.java.version}</maven.compiler.target>
 		<log4j.version>2.17.1</log4j.version>
+
+		<grpc.version>1.36.0</grpc.version>
+		<protoc.version>3.12.0</protoc.version>
+
+		<protobuf.java.version>3.17.3</protobuf.java.version>
+
 	</properties>
 
 	<repositories>
@@ -77,6 +83,12 @@ under the License.
 			<version>${flink.version}</version>
 		</dependency>
 		-->
+
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>${protobuf.java.version}</version>
+		</dependency>
 
 		<!-- flink sql -->
 		<dependency>
@@ -132,6 +144,19 @@ under the License.
 			<version>${flink.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-parquet</artifactId>
+			<version>${flink.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-avro</artifactId>
+			<version>${flink.version}</version>
+		</dependency>
+
+
 
 
 
@@ -159,6 +184,53 @@ under the License.
 
 	<build>
 		<plugins>
+
+			<!-- protobuf生成插件 >-->
+			<plugin>
+				<groupId>org.xolstice.maven.plugins</groupId>
+				<artifactId>protobuf-maven-plugin</artifactId>
+				<version>0.6.1</version>
+				<configuration>
+					<protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}
+					</protocArtifact>
+					<pluginId>grpc-java</pluginId>
+					<pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
+					</pluginArtifact>
+					<protoSourceRoot>${project.basedir}/src/main/resources/</protoSourceRoot>
+					<outputDirectory>${basedir}/src/main/java</outputDirectory>
+					<clearOutputDirectory>false</clearOutputDirectory>
+
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>compile-custom</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>1.4.1</version>
+				<executions>
+					<execution>
+						<id>enforce</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireUpperBoundDeps/>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!--protobuf 插件-->
+
 
 			<!-- Java Compiler -->
 			<plugin>

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package com.at.proto;
+option java_package = "com.at.proto";
+option java_outer_classname = "ItemViewCountProto";
+option java_multiple_files = false;
+option java_string_check_utf8 = true;
+option optimize_for = SPEED; // 加快解析
+
+message ItemViewCountProto{
+
+  int64 itemId = 1;
+  int64 windowStart = 2;
+  int64 windowEnd = 3;
+  int64 count = 4;
+
+
+}
