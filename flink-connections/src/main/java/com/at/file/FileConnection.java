@@ -2,7 +2,7 @@ package com.at.file;
 
 import com.at.pojo.ItemViewCount;
 import com.at.pojo.UserBehavior;
-import org.apache.avro.Schema;
+import com.at.proto.ItemViewCountProto;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.AggregateFunction;
@@ -14,26 +14,31 @@ import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.connector.file.sink.FileSink;
-import org.apache.flink.connector.file.src.FileSource;
-import org.apache.flink.connector.file.src.reader.StreamFormat;
 import org.apache.flink.core.fs.Path;
-import org.apache.flink.formats.csv.CsvReaderFormat;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import org.apache.flink.core.io.SimpleVersionedSerializer;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
+import org.apache.flink.streaming.api.functions.sink.filesystem.BucketAssigner;
+import org.apache.flink.streaming.api.functions.sink.filesystem.OutputFileConfig;
+import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.DateTimeBucketAssigner;
+import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.SimpleVersionedStringSerializer;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
+import org.apache.flink.util.Preconditions;
 
-import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @create 2022-06-03
@@ -47,7 +52,7 @@ public class FileConnection {
         env.setParallelism(1);
 
 
-        SingleOutputStreamOperator<ItemViewCount> result = env
+        SingleOutputStreamOperator<UserBehavior> pvSourceStream = env
                 .readTextFile("D:\\workspace\\flink_\\files\\UserBehavior.csv")
                 .map(new MapFunction<String, UserBehavior>() {
                     @Override
@@ -62,7 +67,10 @@ public class FileConnection {
                                 .build();
                     }
                 })
-                .filter(u -> "pv".equals(u.behavior))
+                .filter(u -> "pv".equals(u.behavior));
+
+
+        SingleOutputStreamOperator<ItemViewCountProto.ItemViewCount> result = pvSourceStream
                 .assignTimestampsAndWatermarks(
                         WatermarkStrategy
                                 .<UserBehavior>forBoundedOutOfOrderness(Duration.ofSeconds(1L))
@@ -117,9 +125,19 @@ public class FileConnection {
                 .process(new TopN(3));
 
 
-        //String
+//        org.apache.avro.Schema
+
+        //OutputFileConfig  https://nightlies.apache.org/flink/flink-docs-release-1.15/zh/docs/connectors/datastream/filesystem/#file-sink
+        OutputFileConfig outputFileConfig = OutputFileConfig
+                .builder()
+                .withPartPrefix("prefix") // 文件前缀
+                .withPartSuffix(".ext") // 文件后缀
+                .build();
+
+
+        // String format
         FileSink<String> sinkStringFile = FileSink
-                .forRowFormat(new Path(""), new SimpleStringEncoder<String>("UTF-8"))
+                .forRowFormat(new Path("D:\\workspace\\flink_\\files\\stringformat"), new SimpleStringEncoder<String>("UTF-8"))
                 .withRollingPolicy(
                         DefaultRollingPolicy
                                 .builder()
@@ -128,13 +146,27 @@ public class FileConnection {
                                 .withMaxPartSize(MemorySize.ofMebiBytes(1)) // 文件大小 超过 1M 生成一个新文件
                                 .build()
                 )
-//                .withOutputFileConfig()
+                .withOutputFileConfig(outputFileConfig)
+                .withBucketAssigner(new MyDataTimeBucketAssigner<>())
                 .build();
 
+//        pvSourceStream
+//                .map(r -> r.toString())
+//                .sinkTo(sinkStringFile);
 
 
-//        FileSink<Object> sinkAvroFile = FileSink
-//                .forBulkFormat()
+
+        // parquet format
+//        FileSink<ItemViewCountProto.ItemViewCount> sinkParquetFile = FileSink
+//                .forBulkFormat(new Path(), ParquetProtoWriters.forType(ItemViewCountProto.ItemViewCount.class))
+//                .build();
+//
+//        // avro format
+////        FileSink
+//
+//
+//        FileSink
+//                .forBulkFormat(new Path(), null)
 //                .build();
 
 
@@ -142,7 +174,72 @@ public class FileConnection {
 
     }
 
-    static class TopN extends KeyedProcessFunction<Long, ItemViewCount, ItemViewCount> {
+    //org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.DateTimeBucketAssigner
+    static class MyDataTimeBucketAssigner<IN> implements BucketAssigner<IN, String>{
+
+        private static final long serialVersionUID = 1L;
+        private static final String DEFAULT_FORMAT_STRING = "yyyy-MM-dd--HH-mm";
+        private final String formatString;
+        private final ZoneId zoneId;
+        private transient DateTimeFormatter dateTimeFormatter;
+
+        public MyDataTimeBucketAssigner(){
+            this("yyyy-MM-dd--HH-mm");
+        }
+
+        public MyDataTimeBucketAssigner(String formatString){
+            this(formatString,ZoneId.systemDefault());
+        }
+
+        public MyDataTimeBucketAssigner(ZoneId zoneId){
+            this("yyyy-MM-dd--HH-mm",zoneId);
+        }
+
+        public MyDataTimeBucketAssigner(String formatString, ZoneId zoneId) {
+            this.formatString = (String) Preconditions.checkNotNull(formatString);
+            this.zoneId = (ZoneId) Preconditions.checkNotNull(zoneId);
+        }
+
+
+        @Override
+        public String getBucketId(IN in, Context context) {
+
+            if(this.dateTimeFormatter == null){
+                this.dateTimeFormatter = DateTimeFormatter.ofPattern(this.formatString).withZone(this.zoneId);
+            }
+
+            return this.dateTimeFormatter.format(Instant.ofEpochMilli(context.currentProcessingTime()));
+        }
+
+        @Override
+        public SimpleVersionedSerializer<String> getSerializer() {
+            return SimpleVersionedStringSerializer.INSTANCE;
+        }
+
+        @Override
+        public String toString() {
+            return "MyDataTimeBucketAssigner{" +
+                    "formatString='" + formatString + '\'' +
+                    ", zoneId=" + zoneId +
+                    ", dateTimeFormatter=" + dateTimeFormatter +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MyDataTimeBucketAssigner<?> that = (MyDataTimeBucketAssigner<?>) o;
+            return Objects.equals(formatString, that.formatString) && Objects.equals(zoneId, that.zoneId) && Objects.equals(dateTimeFormatter, that.dateTimeFormatter);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(formatString, zoneId, dateTimeFormatter);
+        }
+    }
+
+    static class TopN extends KeyedProcessFunction<Long, ItemViewCount, ItemViewCountProto.ItemViewCount> {
 
         private int N;
 
@@ -162,13 +259,13 @@ public class FileConnection {
         }
 
         @Override
-        public void processElement(ItemViewCount value, Context ctx, Collector<ItemViewCount> out) throws Exception {
+        public void processElement(ItemViewCount value, Context ctx, Collector<ItemViewCountProto.ItemViewCount> out) throws Exception {
             windowAllItemData.add(value);
             ctx.timerService().registerEventTimeTimer(value.getWindowEnd() + 1L);
         }
 
         @Override
-        public void onTimer(long timestamp, OnTimerContext ctx, Collector<ItemViewCount> out) throws Exception {
+        public void onTimer(long timestamp, OnTimerContext ctx, Collector<ItemViewCountProto.ItemViewCount> out) throws Exception {
             super.onTimer(timestamp, ctx, out);
 
             ArrayList<ItemViewCount> itemViewCountArrayList = new ArrayList<>();
@@ -186,10 +283,19 @@ public class FileConnection {
                 }
             });
 
-            List<ItemViewCount> result = new ArrayList<>();
+            List<ItemViewCountProto.ItemViewCount> result = new ArrayList<>();
 
             for (int i = 0; i < this.N; i++) {
-                out.collect(itemViewCountArrayList.get(i));
+                ItemViewCount v = itemViewCountArrayList.get(i);
+                out.collect(
+                        ItemViewCountProto.ItemViewCount
+                                .newBuilder()
+                                .setItemId(v.getItemId())
+                                .setWindowStart(v.getWindowStart())
+                                .setWindowEnd(v.getWindowEnd())
+                                .setCount(v.getCount())
+                                .build()
+                );
             }
 
 
