@@ -14,8 +14,13 @@ import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.connector.file.sink.FileSink;
+import org.apache.flink.connector.file.sink.compactor.DecoderBasedReader;
+import org.apache.flink.connector.file.sink.compactor.FileCompactStrategy;
+import org.apache.flink.connector.file.sink.compactor.RecordWiseFileCompactor;
+import org.apache.flink.connector.file.sink.compactor.SimpleStringDecoder;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.core.io.SimpleVersionedSerializer;
+import org.apache.flink.formats.parquet.protobuf.ParquetProtoWriters;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
@@ -23,7 +28,9 @@ import org.apache.flink.streaming.api.functions.sink.filesystem.BucketAssigner;
 import org.apache.flink.streaming.api.functions.sink.filesystem.OutputFileConfig;
 import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.DateTimeBucketAssigner;
 import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.SimpleVersionedStringSerializer;
+import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.CheckpointRollingPolicy;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
+import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
@@ -137,7 +144,7 @@ public class FileConnection {
 
         // String format
         FileSink<String> sinkStringFile = FileSink
-                .forRowFormat(new Path("D:\\workspace\\flink_\\files\\stringformat"), new SimpleStringEncoder<String>("UTF-8"))
+                .forRowFormat(new Path("D:\\workspace\\flink_\\files\\format"), new SimpleStringEncoder<String>("UTF-8"))
                 .withRollingPolicy(
                         DefaultRollingPolicy
                                 .builder()
@@ -148,34 +155,79 @@ public class FileConnection {
                 )
                 .withOutputFileConfig(outputFileConfig)
                 .withBucketAssigner(new MyDataTimeBucketAssigner<>())
+                .enableCompact(
+                        FileCompactStrategy
+                                .Builder
+                                .newBuilder()
+                                .setNumCompactThreads(10)
+                                .enableCompactionOnCheckpoint(5)
+                                .build(),
+                        new RecordWiseFileCompactor<>(new DecoderBasedReader.Factory<>(SimpleStringDecoder::new))
+                )
                 .build();
 
 //        pvSourceStream
 //                .map(r -> r.toString())
-//                .sinkTo(sinkStringFile);
+//                .sinkTo(sinkStringFile)
+//                .uid("compact-p"); //Sink Sink requires to set a uid since its customized topology has set uid fo
 
 
+        //parquet format
+        /*
 
-        // parquet format
-//        FileSink<ItemViewCountProto.ItemViewCount> sinkParquetFile = FileSink
-//                .forBulkFormat(new Path(), ParquetProtoWriters.forType(ItemViewCountProto.ItemViewCount.class))
-//                .build();
+            <dependency>
+                <groupId>org.apache.parquet</groupId>
+                <artifactId>parquet-protobuf</artifactId>
+                <version>1.12.2</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-common -->
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-common</artifactId>
+                <version>3.3.0</version>
+                <scope>provided</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-hdfs -->
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-hdfs</artifactId>
+                <version>3.3.0</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-mapreduce-client-common</artifactId>
+                <version>3.3.0</version>
+            </dependency>
+
+         */
+        FileSink<ItemViewCountProto.ItemViewCount> sinkParquetFile = FileSink
+                .forBulkFormat(new Path("D:\\workspace\\flink_\\files\\format"), ParquetProtoWriters.forType(ItemViewCountProto.ItemViewCount.class))
+                .withRollingPolicy(
+                        OnCheckpointRollingPolicy.build()
+
+                )
+                .withOutputFileConfig(outputFileConfig)
+                .withBucketAssigner(new DateTimeBucketAssigner<>())
+                .build();
+
+//        result.sinkTo(sinkParquetFile);
 //
 //        // avro format
 ////        FileSink
-//
+
 //
 //        FileSink
 //                .forBulkFormat(new Path(), null)
 //                .build();
 
 
-        env.execute();
+        env.execute("file sink test");
 
     }
 
     //org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.DateTimeBucketAssigner
-    static class MyDataTimeBucketAssigner<IN> implements BucketAssigner<IN, String>{
+    static class MyDataTimeBucketAssigner<IN> implements BucketAssigner<IN, String> {
 
         private static final long serialVersionUID = 1L;
         private static final String DEFAULT_FORMAT_STRING = "yyyy-MM-dd--HH-mm";
@@ -183,16 +235,16 @@ public class FileConnection {
         private final ZoneId zoneId;
         private transient DateTimeFormatter dateTimeFormatter;
 
-        public MyDataTimeBucketAssigner(){
+        public MyDataTimeBucketAssigner() {
             this("yyyy-MM-dd--HH-mm");
         }
 
-        public MyDataTimeBucketAssigner(String formatString){
-            this(formatString,ZoneId.systemDefault());
+        public MyDataTimeBucketAssigner(String formatString) {
+            this(formatString, ZoneId.systemDefault());
         }
 
-        public MyDataTimeBucketAssigner(ZoneId zoneId){
-            this("yyyy-MM-dd--HH-mm",zoneId);
+        public MyDataTimeBucketAssigner(ZoneId zoneId) {
+            this("yyyy-MM-dd--HH-mm", zoneId);
         }
 
         public MyDataTimeBucketAssigner(String formatString, ZoneId zoneId) {
@@ -204,7 +256,7 @@ public class FileConnection {
         @Override
         public String getBucketId(IN in, Context context) {
 
-            if(this.dateTimeFormatter == null){
+            if (this.dateTimeFormatter == null) {
                 this.dateTimeFormatter = DateTimeFormatter.ofPattern(this.formatString).withZone(this.zoneId);
             }
 
