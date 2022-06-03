@@ -27,6 +27,22 @@ public class MysqlJDBCConnection {
 
     /*
 
+
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-connector-jdbc</artifactId>
+			<version>${flink.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.28</version>
+		</dependency>
+
+
 CREATE TABLE userbehavior_tbl(
     user_id int not null,
     item_id bigint,
@@ -154,8 +170,6 @@ CREATE TABLE userbehavior_tbl(
                                         xaDataSource.setURL("jdbc:mysql://hadoop102:3306/gmall_report"); // gmall_report?characterEncoding=utf-8&useSSL=false
                                         xaDataSource.setUser("root");
                                         xaDataSource.setPassword("root");
-//                                        xaDataSource.setDatabaseName("gmall_report");
-
 
                                         return xaDataSource;
                                     }
