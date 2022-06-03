@@ -3,6 +3,12 @@ package com.at.file;
 import com.at.pojo.ItemViewCount;
 import com.at.pojo.UserBehavior;
 import com.at.proto.ItemViewCountProto;
+import com.sun.org.apache.bcel.internal.generic.NEW;
+import org.apache.avro.Schema;
+import org.apache.avro.file.CodecFactory;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.reflect.ReflectData;
+import org.apache.avro.reflect.ReflectDatumWriter;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.AggregateFunction;
@@ -20,7 +26,11 @@ import org.apache.flink.connector.file.sink.compactor.RecordWiseFileCompactor;
 import org.apache.flink.connector.file.sink.compactor.SimpleStringDecoder;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.core.io.SimpleVersionedSerializer;
+import org.apache.flink.formats.avro.AvroBuilder;
+import org.apache.flink.formats.avro.AvroWriterFactory;
 import org.apache.flink.formats.parquet.protobuf.ParquetProtoWriters;
+import org.apache.flink.orc.vector.Vectorizer;
+import org.apache.flink.orc.writer.OrcBulkWriterFactory;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
@@ -37,7 +47,15 @@ import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.Preconditions;
+import org.apache.hadoop.hive.ql.exec.vector.BytesColumnVector;
+import org.apache.hadoop.hive.ql.exec.vector.LongColumnVector;
+import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -133,6 +151,7 @@ public class FileConnection {
 
 
 //        org.apache.avro.Schema
+        Schema schema = ReflectData.get().getSchema(ItemViewCount.class);
 
         //OutputFileConfig  https://nightlies.apache.org/flink/flink-docs-release-1.15/zh/docs/connectors/datastream/filesystem/#file-sink
         OutputFileConfig outputFileConfig = OutputFileConfig
@@ -212,18 +231,74 @@ public class FileConnection {
                 .build();
 
 //        result.sinkTo(sinkParquetFile);
-//
-//        // avro format
-////        FileSink
 
-//
-//        FileSink
-//                .forBulkFormat(new Path(), null)
-//                .build();
+        // avro format
+        FileSink<ItemViewCountProto.ItemViewCount> sinkAvroFile = FileSink
+                .forBulkFormat(
+                        new Path("D:\\workspace\\flink_\\files\\format"),
+                        new AvroWriterFactory<>(new AvroBuilder<ItemViewCountProto.ItemViewCount>() {
+                            @Override
+                            public DataFileWriter<ItemViewCountProto.ItemViewCount> createWriter(OutputStream outputStream) throws IOException {
+
+                                Schema schema = ReflectData.get().getSchema(ItemViewCountProto.ItemViewCount.class);
+                                ReflectDatumWriter<ItemViewCountProto.ItemViewCount> datumWriter = new ReflectDatumWriter<>(schema);
+
+                                DataFileWriter<ItemViewCountProto.ItemViewCount> dataFileWriter = new DataFileWriter<>(datumWriter);
+                                dataFileWriter.setCodec(CodecFactory.snappyCodec());
+                                dataFileWriter.create(schema,outputStream);
+
+                                return dataFileWriter;
+                            }
+                        })
+                )
+                .build();
+
+//        result.sinkTo(sinkAvroFile).uid("avro-uid");
+
+        // orc format
+
+        String orcSchema = "struct<_col0:int,_col1:bigint,_col2:int,_col3:string,_col4:bigint>";
+        final OrcBulkWriterFactory<UserBehavior> orcBulkWriterFactory = new OrcBulkWriterFactory<>(new ConsumerVectorizer(orcSchema));
+        FileSink sinkOrcFile = FileSink
+                .forBulkFormat(
+                        new Path("D:\\workspace\\flink_\\files\\format"),
+                        orcBulkWriterFactory
+                )
+                .build();
+
+        pvSourceStream.sinkTo(sinkOrcFile);
+
+
 
 
         env.execute("file sink test");
 
+    }
+
+    static class ConsumerVectorizer extends Vectorizer<UserBehavior> implements Serializable{
+        public ConsumerVectorizer(String schema) {
+            super(schema);
+        }
+
+        @Override
+        public void vectorize(UserBehavior u, VectorizedRowBatch batch) throws IOException {
+
+            org.apache.hadoop.hive.ql.exec.vector.LongColumnVector userIdColVector = (LongColumnVector) batch.cols[0];
+            org.apache.hadoop.hive.ql.exec.vector.LongColumnVector itemIdColVector = (LongColumnVector) batch.cols[1];
+            org.apache.hadoop.hive.ql.exec.vector.LongColumnVector categoryIdColVector = (LongColumnVector) batch.cols[2];
+            BytesColumnVector behaviorColVector = (BytesColumnVector)batch.cols[3];
+            org.apache.hadoop.hive.ql.exec.vector.LongColumnVector tsColVector = (LongColumnVector) batch.cols[4];
+
+            int row = batch.size++;
+
+            userIdColVector.vector[row] = u.getUserId();
+            itemIdColVector.vector[row] = u.getItemId();
+            categoryIdColVector.vector[row] = u.getCategoryId();
+            behaviorColVector.setVal(row,u.behavior.getBytes(StandardCharsets.UTF_8));
+            tsColVector.vector[row] = u.getTs();
+
+
+        }
     }
 
     //org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.DateTimeBucketAssigner
