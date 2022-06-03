@@ -183,6 +183,16 @@ under the License.
 	</dependencies>
 
 	<build>
+
+		<!-- com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier} -->
+		<extensions>
+			<extension>
+				<groupId>kr.motd.maven</groupId>
+				<artifactId>os-maven-plugin</artifactId>
+				<version>1.5.0.Final</version>
+			</extension>
+		</extensions>
+
 		<plugins>
 
 			<!-- protobuf生成插件 >-->

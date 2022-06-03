@@ -7,7 +7,7 @@ option java_multiple_files = false;
 option java_string_check_utf8 = true;
 option optimize_for = SPEED; // 加快解析
 
-message ItemViewCountProto{
+message ItemViewCount{
 
   int64 itemId = 1;
   int64 windowStart = 2;
