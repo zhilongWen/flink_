@@ -24,7 +24,7 @@ import java.util.Optional;
 public class EnvironmentUtil {
 
 
-    public static ParameterTool buildParameterTool(final String[] args) {
+    private static ParameterTool buildParameterTool(final String[] args) {
         try {
             return ParameterTool
                     .fromPropertiesFile(EnvironmentUtil.class.getResourceAsStream(PropertiesConstants.DEFAULT_PROPERTIES))
@@ -62,7 +62,7 @@ public class EnvironmentUtil {
         return new Environment(env);
     }
 
-    static class Environment {
+    public static class Environment {
 
         private StreamExecutionEnvironment env;
         private StreamTableEnvironment tableEnv;
