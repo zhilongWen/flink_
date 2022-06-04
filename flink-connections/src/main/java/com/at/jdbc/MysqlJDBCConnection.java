@@ -92,52 +92,22 @@ CREATE TABLE userbehavior_tbl(
                     @Override
                     public void flatMap(UserBehavior value, Collector<UserBehavior> out) throws Exception {
 
-//                        if (!set.contains(value.userId)) {
-//                            set.add(value.userId);
-//                            out.collect(value);
-//                        }
-
-                        if (!bloomFilter.mightContain(value.userId)) {
-                            bloomFilter.put(value.userId);
+                        if (!set.contains(value.userId)) {
+                            set.add(value.userId);
                             out.collect(value);
                         }
+
+//                        if (!bloomFilter.mightContain(value.userId)) {
+//                            bloomFilter.put(value.userId);
+//                            out.collect(value);
+//                        }
 
                     }
                 });
 
-        buyStream
-                .addSink(
-                        JdbcSink.sink(
-                                "insert into userbehavior_tbl (user_id,item_id,category_id,behavior,ts) values(?,?,?,?,?)",
-                                new JdbcStatementBuilder<UserBehavior>() {
-                                    @Override
-                                    public void accept(PreparedStatement preparedStatement, UserBehavior userBehavior) throws SQLException {
-                                        preparedStatement.setInt(1, userBehavior.getUserId());
-                                        preparedStatement.setLong(2, userBehavior.getItemId());
-                                        preparedStatement.setInt(3, userBehavior.getCategoryId());
-                                        preparedStatement.setString(4, userBehavior.getBehavior());
-                                        preparedStatement.setLong(5, userBehavior.getTs());
-
-                                    }
-                                },
-                                JdbcExecutionOptions
-                                        .builder()
-                                        .withBatchSize(100)
-                                        .withBatchIntervalMs(50)
-                                        .withMaxRetries(3)
-                                        .build(),
-                                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                                        .withUrl("jdbc:mysql://hadoop102:3306/gmall_report?characterEncoding=utf-8&useSSL=false")
-                                        .withDriverName("com.mysql.cj.jdbc.Driver")
-                                        .withUsername("root")
-                                        .withPassword("root")
-                                        .build()
-                        )
-                );
-
 //        buyStream
 //                .addSink(
-//                        JdbcSink.exactlyOnceSink(
+//                        JdbcSink.sink(
 //                                "insert into userbehavior_tbl (user_id,item_id,category_id,behavior,ts) values(?,?,?,?,?)",
 //                                new JdbcStatementBuilder<UserBehavior>() {
 //                                    @Override
@@ -154,28 +124,58 @@ CREATE TABLE userbehavior_tbl(
 //                                        .builder()
 //                                        .withBatchSize(100)
 //                                        .withBatchIntervalMs(50)
-//                                        .withMaxRetries(0) //// JDBC XA sink requires maxRetries equal to 0, otherwise it could cause duplicates. See issue FLINK-22311 for details.
+//                                        .withMaxRetries(3)
 //                                        .build(),
-//                                JdbcExactlyOnceOptions
-//                                        .builder()
+//                                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+//                                        .withUrl("jdbc:mysql://hadoop102:3306/gmall_report?characterEncoding=utf-8&useSSL=false")
+//                                        .withDriverName("com.mysql.cj.jdbc.Driver")
+//                                        .withUsername("root")
+//                                        .withPassword("root")
+//                                        .build()
+//                        )
+//                );
+
+        buyStream
+                .addSink(
+                        JdbcSink.exactlyOnceSink(
+                                "insert into userbehavior_tbl (user_id,item_id,category_id,behavior,ts) values(?,?,?,?,?)",
+                                new JdbcStatementBuilder<UserBehavior>() {
+                                    @Override
+                                    public void accept(PreparedStatement preparedStatement, UserBehavior userBehavior) throws SQLException {
+                                        preparedStatement.setInt(1, userBehavior.getUserId());
+                                        preparedStatement.setLong(2, userBehavior.getItemId());
+                                        preparedStatement.setInt(3, userBehavior.getCategoryId());
+                                        preparedStatement.setString(4, userBehavior.getBehavior());
+                                        preparedStatement.setLong(5, userBehavior.getTs());
+
+                                    }
+                                },
+                                JdbcExecutionOptions
+                                        .builder()
+//                                        .withBatchSize(100)
+//                                        .withBatchIntervalMs(50)
+                                        .withMaxRetries(0) //// JDBC XA sink requires maxRetries equal to 0, otherwise it could cause duplicates. See issue FLINK-22311 for details.
+                                        .build(),
+                                JdbcExactlyOnceOptions
+                                        .builder()
 //                                        .withMaxCommitAttempts(3)
 //                                        .withAllowOutOfOrderCommits(true)
 //                                        .withRecoveredAndRollback(true)
-//                                        .withTransactionPerConnection(true)
-//                                        .build(),
-//                                new SerializableSupplier<XADataSource>() {
-//                                    @Override
-//                                    public XADataSource get() {
-//                                        MysqlXADataSource xaDataSource = new com.mysql.cj.jdbc.MysqlXADataSource();
-//                                        xaDataSource.setURL("jdbc:mysql://hadoop102:3306/gmall_report"); // gmall_report?characterEncoding=utf-8&useSSL=false
-//                                        xaDataSource.setUser("root");
-//                                        xaDataSource.setPassword("root");
-//
-//                                        return xaDataSource;
-//                                    }
-//                                }
-//                        )
-//                );
+                                        .withTransactionPerConnection(true)
+                                        .build(),
+                                new SerializableSupplier<XADataSource>() {
+                                    @Override
+                                    public XADataSource get() {
+                                        MysqlXADataSource xaDataSource = new com.mysql.cj.jdbc.MysqlXADataSource();
+                                        xaDataSource.setURL("jdbc:mysql://hadoop102:3306/gmall_report"); // gmall_report?characterEncoding=utf-8&useSSL=false
+                                        xaDataSource.setUser("root");
+                                        xaDataSource.setPassword("root");
+
+                                        return xaDataSource;
+                                    }
+                                }
+                        )
+                );
 
 
         env.execute();
