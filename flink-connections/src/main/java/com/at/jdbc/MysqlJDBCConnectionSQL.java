@@ -16,15 +16,10 @@ public class MysqlJDBCConnectionSQL {
 
         // --execute.mode batch --enable.table.env true
 
-//        EnvironmentUtil.Environment environment = EnvironmentUtil.getStreamExecutionEnvironment(args);
-//
-//        StreamExecutionEnvironment env = environment.getEnv();
-//        StreamTableEnvironment tableEnv = environment.getTableEnv();
+        EnvironmentUtil.Environment environment = EnvironmentUtil.getStreamExecutionEnvironment(args);
 
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-
-        EnvironmentSettings settings = EnvironmentSettings.newInstance().inBatchMode().build();
-        StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
+        StreamExecutionEnvironment env = environment.getEnv();
+        StreamTableEnvironment tableEnv = environment.getTableEnv();
 
 
         String sourceSQL = "CREATE TABLE mysql_source_tbl(\n"
