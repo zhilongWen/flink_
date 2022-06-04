@@ -10,7 +10,7 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
  */
 public class MysqlJDBCConnectionSQL {
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
 
         // --default.parallelism 1 --enable.checkpoint true --checkpoint.type fs --checkpoint.dir file:///D:\\workspace\\flink_\\files\\ck --checkpoint.interval 60000 --enable.table.env true
 
@@ -69,6 +69,8 @@ public class MysqlJDBCConnectionSQL {
 
 
         tableEnv.executeSql(sourceSQL);
+
+
         tableEnv.executeSql(dimSourceSQL);
 
         String sinkSQL = "CREATE TABLE IF NOT EXISTS sin_user_tbl(\n"
@@ -91,7 +93,7 @@ public class MysqlJDBCConnectionSQL {
                 + "    'username' = 'root',\n"
                 + "    'password' = 'root',\n"
                 + "    'connection.max-retry-timeout' = '60S', \n"
-                + "    'sink.buffer-flush.max-rows' = '50',\n"
+                + "    'sink.buffer-flush.max-rows' = '500',\n"  // sink.buffer-flush.max-rows  sink.buffer-flush.interval 合理设置否则 数据库中看到数据 延迟过大
                 + "    'sink.buffer-flush.interval' = '1s',\n"
                 + "    'sink.max-retries' = '3',\n"
                 + "    'sink.parallelism' = '1'\n"
@@ -113,9 +115,6 @@ public class MysqlJDBCConnectionSQL {
 
         tableEnv.executeSql(sinkSQL);
         tableEnv.executeSql(insertSQL);
-
-        tableEnv.executeSql("select * from sin_user_tbl").print();
-
 
 
 //        env.execute();  // No operators defined in streaming topology. Cannot execute.
