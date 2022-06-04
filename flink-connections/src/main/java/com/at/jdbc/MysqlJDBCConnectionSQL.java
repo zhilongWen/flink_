@@ -111,6 +111,18 @@ public class MysqlJDBCConnectionSQL {
         tableEnv.executeSql(sinkSQL);
         tableEnv.executeSql(insertSQL);
 
+        /*
+
+RESULT
+
+user_id  name       age     sex  item_id  category_id  behavior          ts  address
+-------  ------  ------  ------  -------  -----------  --------  ----------  --------------------
+1016727  Mary        10       1   656891      4069500  buy       1511672008  中国北京市
+1016825  Alice       14       0  2143518      2885642  buy       1511675555  中国台湾
+1016839  Liz         17       1   957999      1368970  buy       1511686960  中国上海
+1017130  Bob         20       0  4697937      4217906  buy       1511686854  ZhongGuo Guangzhou
+         */
+
 
 //        env.execute();  // No operators defined in streaming topology. Cannot execute.
 
