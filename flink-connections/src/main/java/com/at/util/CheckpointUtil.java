@@ -56,6 +56,11 @@ public class CheckpointUtil {
         env.getCheckpointConfig().setTolerableCheckpointFailureNumber(Integer.MAX_VALUE);
         // 设置 checkpoint 的并发度为 1
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
+        //手动cancel时是否保留checkpoint
+//        env.getCheckpointConfig().enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        env.getCheckpointConfig().setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+
+
 
     }
 

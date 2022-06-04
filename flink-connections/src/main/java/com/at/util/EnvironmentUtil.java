@@ -45,14 +45,26 @@ public class EnvironmentUtil {
         Optional.ofNullable(parameterTool.get(PropertiesConstants.DEFAULT_PARALLELISM)).ifPresent(p -> env.setParallelism(Integer.parseInt(p)));
         env.getConfig().setRestartStrategy(RestartStrategies.fixedDelayRestart(4, 60000));
 
-        Optional.ofNullable(parameterTool.get(PropertiesConstants.ENABLE_CHECKPOINT)).filter(t -> Boolean.getBoolean(t)).ifPresent(t -> CheckpointUtil.enableCheckpoint(env, parameterTool));
+//        Optional.ofNullable(parameterTool.get(PropertiesConstants.ENABLE_CHECKPOINT)).filter(t -> Boolean.getBoolean(t)).ifPresent(t -> CheckpointUtil.enableCheckpoint(env, parameterTool));
+
+        if(parameterTool.get(PropertiesConstants.ENABLE_CHECKPOINT) != null && parameterTool.getBoolean(PropertiesConstants.ENABLE_CHECKPOINT)){
+            CheckpointUtil.enableCheckpoint(env, parameterTool);
+        }
 
         env.getConfig().setGlobalJobParameters(parameterTool);
 
         if (parameterTool.get(PropertiesConstants.ENABLE_TABLE_ENV) != null && parameterTool.getBoolean(PropertiesConstants.ENABLE_TABLE_ENV)) {
 
             //table 环境
-            EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
+
+            EnvironmentSettings settings = null;
+
+            if(PropertiesConstants.BATCH_MODE.equalsIgnoreCase(parameterTool.get(PropertiesConstants.EXECUTE_MODE))){
+                settings = EnvironmentSettings.newInstance().inBatchMode().build();
+            }else {
+                settings= EnvironmentSettings.newInstance().inStreamingMode().build();
+            }
+
             StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 
             return new Environment(env, tableEnv);

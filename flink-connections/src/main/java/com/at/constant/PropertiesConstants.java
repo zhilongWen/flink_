@@ -5,12 +5,19 @@ package com.at.constant;
  */
 public class PropertiesConstants {
 
+    // --default.parallelism 1 --enable.checkpoint true --checkpoint.type fs --checkpoint.dir file:///D:\\workspace\\flink_\\files\\ck --checkpoint.interval 60000 --enable.table.env true
+
     // flink
+
+    public static final String EXECUTE_MODE = "execute.mode";
+    public static final String BATCH_MODE = "batch";
+    public static final String STREAMING_MODE = "stream";
+
     public static final String DEFAULT_PARALLELISM = "default.parallelism";
 
     public static final String ENABLE_CHECKPOINT = "enable.checkpoint";
-    public static final String CHECKPOINT_DIR = "checkpoint.checkpoint";
     public static final String CHECKPOINT_TYPE = "checkpoint.type";
+    public static final String CHECKPOINT_DIR = "checkpoint.dir";
     public static final String CHECKPOINT_INTERVAL = "checkpoint.interval";
 
     public static final String MEMORY = "memory";
