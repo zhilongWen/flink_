@@ -28,7 +28,7 @@ public class WC {
 
         env.setParallelism(1);
 
-        DataStreamSource<String> streamSource = env.socketTextStream("127.0.0.1", 8099);
+        DataStreamSource<String> streamSource = env.socketTextStream("hadoop102", 8099);
 
 //        SingleOutputStreamOperator<Tuple2<String, Integer>> streamOperator = streamSource.flatMap(new FlatMapFunction<String, Tuple2<String, Integer>>() {
 //            @Override
