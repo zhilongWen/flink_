@@ -1,5 +1,6 @@
 package com.at.hive;
 
+import com.at.util.EnvironmentUtil;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.SqlDialect;
@@ -151,12 +152,18 @@ public class HiveConnector {
 
 
     public static void main(String[] args) throws Exception {
+//
+//        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+//
+//        env.setParallelism(1);
+//
+//        StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        // --execute.mode stream --enable.checkpoint false --enable.table.env true --enable.hive.env true
 
-        env.setParallelism(1);
-
-        StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
+        EnvironmentUtil.Environment environment = EnvironmentUtil.getExecutionEnvironment(args);
+        StreamExecutionEnvironment env = environment.getEnv();
+        StreamTableEnvironment tableEnv = environment.getTableEnv();
 
         String name = "myhive";
         String defaultDatabase = "default";

@@ -39,7 +39,7 @@ public class EnvironmentUtil {
         return ParameterTool.fromArgs(args).mergeWith(ParameterTool.fromSystemProperties());
     }
 
-    public static Environment getStreamExecutionEnvironment(String[] args) {
+    public static Environment getExecutionEnvironment(String[] args) {
 
         ParameterTool parameterTool = buildParameterTool(args);
 
@@ -61,7 +61,6 @@ public class EnvironmentUtil {
         if (checkArgument(parameterTool.get(PropertiesConstants.ENABLE_TABLE_ENV))) {
             //table 环境
 
-            EnvironmentSettings settings = null;
             EnvironmentSettings.Builder settingsBuilder = null;
 
             if (PropertiesConstants.BATCH_MODE.equalsIgnoreCase(parameterTool.get(PropertiesConstants.EXECUTE_MODE))) {
@@ -80,7 +79,7 @@ public class EnvironmentUtil {
                 configuration.setString("table.exec.mini-batch.enabled", "true");
                 configuration.setString("table.exec.mini-batch.allow-latency", "5 s");
                 configuration.setString("table.exec.mini-batch.size", "5000");
-                settings = settingsBuilder.withConfiguration(configuration).build();
+                EnvironmentSettings settings = settingsBuilder.withConfiguration(configuration).build();
 
                 StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 
@@ -94,7 +93,7 @@ public class EnvironmentUtil {
 
             }
 
-            StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
+            StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settingsBuilder.build());
 
             return new Environment(env, tableEnv);
         }

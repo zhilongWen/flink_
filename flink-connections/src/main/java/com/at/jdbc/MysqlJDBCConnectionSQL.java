@@ -16,7 +16,7 @@ public class MysqlJDBCConnectionSQL {
 
         // --execute.mode batch --enable.table.env true
 
-        EnvironmentUtil.Environment environment = EnvironmentUtil.getStreamExecutionEnvironment(args);
+        EnvironmentUtil.Environment environment = EnvironmentUtil.getExecutionEnvironment(args);
 
         StreamExecutionEnvironment env = environment.getEnv();
         StreamTableEnvironment tableEnv = environment.getTableEnv();
