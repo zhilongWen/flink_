@@ -25,6 +25,7 @@ public class PropertiesConstants {
     public static final String ROCKSDB = "rocksdb";
 
     public static final String ENABLE_TABLE_ENV = "enable.table.env";
+    public static final String TABLE_MIN_BATCH = "table.min.batch";
 
     public static final String ENABLE_HIVE_ENV = "enable.hive.env";
 
