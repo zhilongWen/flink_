@@ -50,22 +50,48 @@ public class EnvironmentUtil {
 
 //        Optional.ofNullable(parameterTool.get(PropertiesConstants.ENABLE_CHECKPOINT)).filter(t -> Boolean.getBoolean(t)).ifPresent(t -> CheckpointUtil.enableCheckpoint(env, parameterTool));
 
-        if(parameterTool.get(PropertiesConstants.ENABLE_CHECKPOINT) != null && parameterTool.getBoolean(PropertiesConstants.ENABLE_CHECKPOINT)){
+//        if(parameterTool.get(PropertiesConstants.ENABLE_CHECKPOINT) != null && parameterTool.getBoolean(PropertiesConstants.ENABLE_CHECKPOINT)){
+        if (checkArgument(parameterTool.get(PropertiesConstants.ENABLE_CHECKPOINT))) {
             CheckpointUtil.enableCheckpoint(env, parameterTool);
         }
 
         env.getConfig().setGlobalJobParameters(parameterTool);
 
-        if (parameterTool.get(PropertiesConstants.ENABLE_TABLE_ENV) != null && parameterTool.getBoolean(PropertiesConstants.ENABLE_TABLE_ENV)) {
-
+//        if (parameterTool.get(PropertiesConstants.ENABLE_TABLE_ENV) != null && parameterTool.getBoolean(PropertiesConstants.ENABLE_TABLE_ENV)) {
+        if (checkArgument(parameterTool.get(PropertiesConstants.ENABLE_TABLE_ENV))) {
             //table 环境
 
             EnvironmentSettings settings = null;
+            EnvironmentSettings.Builder settingsBuilder = null;
 
-            if(PropertiesConstants.BATCH_MODE.equalsIgnoreCase(parameterTool.get(PropertiesConstants.EXECUTE_MODE))){
-                settings = EnvironmentSettings.newInstance().inBatchMode().build();
-            }else {
-                settings= EnvironmentSettings.newInstance().inStreamingMode().build();
+            if (PropertiesConstants.BATCH_MODE.equalsIgnoreCase(parameterTool.get(PropertiesConstants.EXECUTE_MODE))) {
+//                settings = EnvironmentSettings.newInstance().inBatchMode().build();
+                settingsBuilder = EnvironmentSettings.newInstance().inStreamingMode();
+            } else {
+//                settings= EnvironmentSettings.newInstance().inStreamingMode().build();
+                settingsBuilder = EnvironmentSettings.newInstance().inStreamingMode();
+            }
+
+//            if(parameterTool.get(PropertiesConstants.TABLE_MIN_BATCH) != null && parameterTool.getBoolean(PropertiesConstants.TABLE_MIN_BATCH)){
+            if (checkArgument(parameterTool.get(PropertiesConstants.TABLE_MIN_BATCH))) {
+                // instantiate table environment
+                Configuration configuration = new Configuration();
+                // set low-level key-value options
+                configuration.setString("table.exec.mini-batch.enabled", "true");
+                configuration.setString("table.exec.mini-batch.allow-latency", "5 s");
+                configuration.setString("table.exec.mini-batch.size", "5000");
+                settings = settingsBuilder.withConfiguration(configuration).build();
+
+                StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
+
+                // access flink configuration after table environment instantiation
+                // set low-level key-value options
+                tableEnv.getConfig().set("table.exec.mini-batch.enabled", "true");
+                tableEnv.getConfig().set("table.exec.mini-batch.allow-latency", "5 s");
+                tableEnv.getConfig().set("table.exec.mini-batch.size", "5000");
+
+                return new Environment(env, tableEnv);
+
             }
 
             StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
@@ -75,6 +101,16 @@ public class EnvironmentUtil {
 
 
         return new Environment(env);
+    }
+
+    public static boolean checkArgument(String condition) {
+
+        if (condition == null) {
+            return false;
+        } else {
+            return Boolean.parseBoolean(condition);
+        }
+
     }
 
     public static class Environment {
@@ -92,7 +128,7 @@ public class EnvironmentUtil {
         }
 
         public Environment(StreamExecutionEnvironment env, StreamTableEnvironment tableEnv, boolean isTableEnv) {
-            this.env = Preconditions.checkNotNull(env,"StreamExecutionEnvironment must not be null");
+            this.env = Preconditions.checkNotNull(env, "StreamExecutionEnvironment must not be null");
             this.tableEnv = tableEnv;
             this.isTableEnv = isTableEnv;
         }
