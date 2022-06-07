@@ -24,6 +24,25 @@ select user_id,
        '2100'                                      as hm
 from source_tbl
 
+create table if not exists file_soure_tbl
+(
+    user_id     bigint,
+    item_id     bigint,
+    category_id bigint,
+    behavior string,
+    ts          bigint,
+    row_time    as to_timestamp(from_unixtime(ts,'yyyy-MM-dd HH:mm:ss')),
+    watermark for row_time as row_time - interval '1' second
+)
+with (
+    'connector' = 'filesystem',
+    'path' = 'file:///D:/workspace/flink_/files/UserBehavior.csv',
+    'format' = 'csv',
+    'csv.ignore-parse-errors' = 'true',
+    'csv.allow-comments' = 'true'
+)
+
+
 
 
 

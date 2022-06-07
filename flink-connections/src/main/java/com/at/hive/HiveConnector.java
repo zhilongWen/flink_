@@ -274,6 +274,7 @@ public class HiveConnector {
                 .as("user_id", "name", "age", "sex", "address");
 
         /*
+
 21:17:32,033 ERROR org.apache.flink.table.planner.delegation.hive.copy.HiveParserSemanticAnalyzer [] - org.apache.hadoop.hive.ql.parse.SemanticException: Line 9:6 Table not found 'source_tbl'
 	at org.apache.flink.table.planner.delegation.hive.copy.HiveParserSemanticAnalyzer.getMetaData(HiveParserSemanticAnalyzer.java:1547)
 	at org.apache.flink.table.planner.delegation.hive.copy.HiveParserSemanticAnalyzer.getMetaData(HiveParserSemanticAnalyzer.java:1487)
