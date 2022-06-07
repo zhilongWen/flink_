@@ -41,65 +41,68 @@ public class EnvironmentUtil {
 
     public static Environment getExecutionEnvironment(String[] args) {
 
+        // get ParameterTool
         ParameterTool parameterTool = buildParameterTool(args);
 
+        // create stream environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
+        //set default parallel
         Optional.ofNullable(parameterTool.get(PropertiesConstants.DEFAULT_PARALLELISM)).ifPresent(p -> env.setParallelism(Integer.parseInt(p)));
+
+        // set restart strategy
         env.getConfig().setRestartStrategy(RestartStrategies.fixedDelayRestart(4, 60000));
 
-//        Optional.ofNullable(parameterTool.get(PropertiesConstants.ENABLE_CHECKPOINT)).filter(t -> Boolean.getBoolean(t)).ifPresent(t -> CheckpointUtil.enableCheckpoint(env, parameterTool));
-
-//        if(parameterTool.get(PropertiesConstants.ENABLE_CHECKPOINT) != null && parameterTool.getBoolean(PropertiesConstants.ENABLE_CHECKPOINT)){
+        // set checkpoint config
         if (checkArgument(parameterTool.get(PropertiesConstants.ENABLE_CHECKPOINT))) {
             CheckpointUtil.enableCheckpoint(env, parameterTool);
         }
 
+        // set global param
         env.getConfig().setGlobalJobParameters(parameterTool);
 
-//        if (parameterTool.get(PropertiesConstants.ENABLE_TABLE_ENV) != null && parameterTool.getBoolean(PropertiesConstants.ENABLE_TABLE_ENV)) {
-        if (checkArgument(parameterTool.get(PropertiesConstants.ENABLE_TABLE_ENV))) {
-            //table 环境
 
-            EnvironmentSettings.Builder settingsBuilder = null;
+        // if not table environment, return Environment
+        if (!checkArgument(parameterTool.get(PropertiesConstants.ENABLE_TABLE_ENV))) return new Environment(env);
 
-            if (PropertiesConstants.BATCH_MODE.equalsIgnoreCase(parameterTool.get(PropertiesConstants.EXECUTE_MODE))) {
-//                settings = EnvironmentSettings.newInstance().inBatchMode().build();
-                settingsBuilder = EnvironmentSettings.newInstance().inStreamingMode();
-            } else {
-//                settings= EnvironmentSettings.newInstance().inStreamingMode().build();
-                settingsBuilder = EnvironmentSettings.newInstance().inStreamingMode();
-            }
+        // add table environment
 
-//            if(parameterTool.get(PropertiesConstants.TABLE_MIN_BATCH) != null && parameterTool.getBoolean(PropertiesConstants.TABLE_MIN_BATCH)){
-            if (checkArgument(parameterTool.get(PropertiesConstants.TABLE_MIN_BATCH))) {
-                // instantiate table environment
-                Configuration configuration = new Configuration();
-                // set low-level key-value options
-                configuration.setString("table.exec.mini-batch.enabled", "true");
-                configuration.setString("table.exec.mini-batch.allow-latency", "5 s");
-                configuration.setString("table.exec.mini-batch.size", "5000");
-                EnvironmentSettings settings = settingsBuilder.withConfiguration(configuration).build();
+        // build environment setting
+        EnvironmentSettings.Builder settingsBuilder = null;
 
-                StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
-
-                // access flink configuration after table environment instantiation
-                // set low-level key-value options
-                tableEnv.getConfig().set("table.exec.mini-batch.enabled", "true");
-                tableEnv.getConfig().set("table.exec.mini-batch.allow-latency", "5 s");
-                tableEnv.getConfig().set("table.exec.mini-batch.size", "5000");
-
-                return new Environment(env, tableEnv);
-
-            }
-
-            StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settingsBuilder.build());
-
-            return new Environment(env, tableEnv);
+        // if not batch mode
+        if (PropertiesConstants.BATCH_MODE.equalsIgnoreCase(parameterTool.get(PropertiesConstants.EXECUTE_MODE))) {
+            settingsBuilder = EnvironmentSettings.newInstance().inStreamingMode();
+        } else {
+            settingsBuilder = EnvironmentSettings.newInstance().inStreamingMode();
         }
 
+        // if not table min batch
+        if (!checkArgument(parameterTool.get(PropertiesConstants.TABLE_MIN_BATCH)))
+            return new Environment(env, StreamTableEnvironment.create(env, settingsBuilder.build()));
 
-        return new Environment(env);
+
+        // add min batch config
+
+        // instantiate table environment
+        Configuration configuration = new Configuration();
+        // set low-level key-value options
+        configuration.setString("table.exec.mini-batch.enabled", "true");
+        configuration.setString("table.exec.mini-batch.allow-latency", "5 s");
+        configuration.setString("table.exec.mini-batch.size", "5000");
+        EnvironmentSettings settings = settingsBuilder.withConfiguration(configuration).build();
+
+        StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
+
+        // access flink configuration after table environment instantiation
+        // set low-level key-value options
+        tableEnv.getConfig().set("table.exec.mini-batch.enabled", "true");
+        tableEnv.getConfig().set("table.exec.mini-batch.allow-latency", "5 s");
+        tableEnv.getConfig().set("table.exec.mini-batch.size", "5000");
+
+        return new Environment(env, tableEnv);
+
+
     }
 
     public static boolean checkArgument(String condition) {
