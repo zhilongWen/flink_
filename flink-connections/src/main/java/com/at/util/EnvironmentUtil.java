@@ -2,21 +2,14 @@ package com.at.util;
 
 import com.at.constant.PropertiesConstants;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
-import org.apache.flink.api.java.utils.MultipleParameterTool;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.orc.OrcFilters;
-import org.apache.flink.streaming.api.CheckpointingMode;
-import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.SqlDialect;
-import org.apache.flink.table.api.TableConfig;
-import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
 import org.apache.parquet.Preconditions;
-import org.apache.parquet.filter2.predicate.Operators;
 
 
 import java.io.IOException;
@@ -107,7 +100,7 @@ public class EnvironmentUtil {
 
     }
 
-    public static StreamTableEnvironment enableHiveEnv(StreamTableEnvironment tableEnv){
+    public static StreamTableEnvironment enableHiveEnv(StreamTableEnvironment tableEnv) {
 
         String name = "myhive";
         String defaultDatabase = "default";

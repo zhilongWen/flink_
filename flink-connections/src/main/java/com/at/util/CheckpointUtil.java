@@ -2,11 +2,13 @@ package com.at.util;
 
 import com.at.constant.PropertiesConstants;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
+import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.io.IOException;
@@ -17,8 +19,9 @@ import java.util.Optional;
  */
 public class CheckpointUtil {
 
-    public static void enableCheckpoint(StreamExecutionEnvironment env, ParameterTool parameterTool) {
+    public static StreamExecutionEnvironment enableCheckpoint(StreamExecutionEnvironment env, ParameterTool parameterTool) {
 
+        // --enable.checkpoint true --checkpoint.type fs --checkpoint.dir hdfs://hadoop102:8020/user/flink/checkpoint/ --checkpoint.interval 1000
 
         // 设置状态后端
         String type = parameterTool.get(PropertiesConstants.CHECKPOINT_TYPE);
@@ -29,6 +32,8 @@ public class CheckpointUtil {
         }
 
         Optional.ofNullable(parameterTool.get(PropertiesConstants.CHECKPOINT_DIR)).ifPresent(dir -> {
+
+            System.out.println("checkpoint dir：" + dir);
 
             if (PropertiesConstants.FS.equals(type)) {
                 FsStateBackend fsStateBackend = new FsStateBackend(dir);
@@ -45,8 +50,8 @@ public class CheckpointUtil {
 
         });
 
-        // 每隔 10min 做一次 checkpoint 模式为 AT_LEAST_ONCE
-        env.enableCheckpointing(parameterTool.getLong(PropertiesConstants.CHECKPOINT_INTERVAL), CheckpointingMode.AT_LEAST_ONCE);
+        // 每隔 10min 做一次 checkpoint 模式为 EXACTLY_ONCE
+        env.enableCheckpointing(parameterTool.getLong(PropertiesConstants.CHECKPOINT_INTERVAL), CheckpointingMode.EXACTLY_ONCE);
 
         // 设置 checkpoint 最小间隔周期 500ms
         env.getCheckpointConfig().setMinPauseBetweenCheckpoints(500);
@@ -60,6 +65,14 @@ public class CheckpointUtil {
 //        env.getCheckpointConfig().enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         env.getCheckpointConfig().setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
 
+        // enables the unaligned checkpoints
+        env.getCheckpointConfig().enableUnalignedCheckpoints();
+
+        Configuration config = new Configuration();
+        config.set(ExecutionCheckpointingOptions.ENABLE_CHECKPOINTS_AFTER_TASKS_FINISH, true);
+        env.configure(config);
+
+        return env;
         
     }
 

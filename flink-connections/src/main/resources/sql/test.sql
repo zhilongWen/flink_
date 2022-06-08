@@ -10,6 +10,21 @@ CREATE TABLE IF NOT EXISTS rule_tbl
     location '/user/hive/warehouse/rule_tbl'
     tblproperties("orc.compress" = "snappy")
 
+
+CREATE TABLE IF NOT EXISTS user_behavior_tbl
+(
+    user_id     bigint,
+    item_id     int,
+    category_id bigint,
+    behavior string,
+    ts          bigint
+) comment 'UserBehavior.csv' partitioned by (`dt` STRING,`hm` STRING)
+    stored as orc
+    location '/user/hive/warehouse/user_behavior_tbl'
+    tblproperties("orc.compress" = "snappy")
+
+
+
 insert into rule_tbl partition (dt='20220607',hm='2000')
 values (1016727, 'Mary', 10, 1, '中国北京市')
 
@@ -108,7 +123,7 @@ load
 module hive;
 use modules hive,core;
 
-set table.sql-dialect = hive;
+set table.sql -dialect = hive;
 
 
 CREATE TABLE if not exists kafka_source_tbl
@@ -132,8 +147,8 @@ WITH (
 
 
 insert into user_behavior_tbl
-select CAST(userId AS BIGINT) as user_id,
-       CAST(itemId AS INT) as item_id,
+select CAST(userId AS BIGINT)     as user_id,
+       CAST(itemId AS INT)        as item_id,
        CAST(categoryId AS BIGINT) as category_id,
        behavior,
        ts,
@@ -143,7 +158,30 @@ from kafka_source_tbl
 
 
 
+create table if not exists user_behavior_tbl
+(
+    user_id     bigint,
+    item_id     int,
+    category_id bigint,
+    behavior string,
+    ts          bigint,
+    `dt` string,
+    `hm` string
+) partitioned by (`dt`,`hm`)
+with(
+    'connector'='filesystem',
+    'path'='hdfs://hadoop102:8020/user/hive/warehouse/user_behavior_tbl/',
+    'format'='orc',
+    'partition.time-extractor.timestamp-pattern'='$dt $hour:00:00',
+    'sink.partition-commit.delay'='1 min',
+    'sink.partition-commit.trigger'='partition-time',
+    'sink.partition-commit.watermark-time-zone'='Asia/Shanghai', -- Assume user configured time zone is 'Asia/Shanghai'
+    'sink.partition-commit.policy.kind'='success-file'
+)
 
+
+
+load data inpath '/user/hive/warehouse/user_behavior_tbl/' into table default.student
 
 
 
