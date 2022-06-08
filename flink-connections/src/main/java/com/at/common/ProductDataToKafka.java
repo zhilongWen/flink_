@@ -57,7 +57,7 @@ public class ProductDataToKafka {
         while (true){
             try {
                 write();
-                try { TimeUnit.SECONDS.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }
+                try { TimeUnit.SECONDS.sleep(random.nextInt(5)); } catch (InterruptedException e) { e.printStackTrace(); }
             } catch (Exception e) {
                 e.printStackTrace();
             }

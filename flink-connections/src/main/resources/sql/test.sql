@@ -184,6 +184,48 @@ with(
 load data inpath '/user/hive/warehouse/user_behavior_tbl/' into table default.student
 
 
+set default.parallelism = 1
+set max-parallelism = 4
+set table.sql-dialect = default;
+SET 'execution.checkpointing.interval' = '10 s';
+SET 'execution.runtime-mode' = 'streaming';
+
+
+CREATE TABLE IF not exists kafka_source_tbl
+(
+    `userId`     INT,
+    `itemId`     BIGINT,
+    `categoryId` INT,
+    `behavior` STRING,
+    `ts`         BIGINT,
+    row_time     as TO_TIMESTAMP(FROM_UNIXTIME(ts / 1000, 'yyyy-MM-dd HH:mm:ss')),
+    WATERMARK FOR row_time AS row_time - INTERVAL '1' SECOND
+)
+WITH (
+    'connector' = 'kafka',
+    'topic' = 'user_behaviors',
+    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',
+    'properties.group.id' = 'test-group-id',
+    'scan.startup.mode' = 'earliest-offset',
+    'format' = 'json',
+    'json.ignore-parse-errors' = 'true'
+)
+
+
+
+
+insert into user_behavior_tbl
+select CAST(userId AS BIGINT)     as user_id,
+       CAST(itemId AS INT)        as item_id,
+       CAST(categoryId AS BIGINT) as category_id,
+       behavior,
+       ts,
+       DATE_FORMAT(row_time, 'yyyyMMdd'),
+       DATE_FORMAT(row_time, 'HH')
+from kafka_source_tbl
+
+
+
 
 
 

@@ -19,41 +19,41 @@ public class HIveConnectorSQLToHdfs {
         StreamExecutionEnvironment env = environment.getEnv();
         StreamTableEnvironment tableEnv = environment.getTableEnv();
 
-//        String sourceSQL = "CREATE TABLE IF not exists kafka_source_tbl(\n"
-//                + "    `userId` INT,\n"
-//                + "    `itemId` BIGINT,\n"
-//                + "    `categoryId` INT,\n"
-//                + "    `behavior` STRING,\n"
-//                + "    `ts` BIGINT,\n"
-//                + "    row_time as TO_TIMESTAMP(FROM_UNIXTIME(ts / 1000, 'yyyy-MM-dd HH:mm:ss')),\n"
-//                + "    WATERMARK FOR row_time AS row_time - INTERVAL '1' SECOND\n"
-//                + ") WITH (\n"
-//                + "    'connector' = 'kafka',\n"
-//                + "    'topic' = 'user_behaviors',\n"
-//                + "    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',\n"
-//                + "    'properties.group.id' = 'test-group-id',\n"
-//                + "    'scan.startup.mode' = 'earliest-offset',\n"
-////                + "    'scan.startup.mode' = 'timestamp',\n"
-////                + "    'scan.startup.timestamp-millis' = '1654089523897',\n"
-//                + "    'format' = 'json',\n"
-//                + "     'json.ignore-parse-errors' = 'true'\n"
-//                + ")";
-
-        String sourceSQL = "CREATE TABLE  IF not exists  file_source_tbl(\n"
-                + "    user_id BIGINT,\n"
-                + "    item_id BIGINT,\n"
-                + "    category_id BIGINT,\n"
-                + "    behavior STRING,\n"
-                + "    ts BIGINT,\n"
-                + "    row_time as TO_TIMESTAMP(FROM_UNIXTIME(ts,'yyyy-MM-dd HH:mm:ss')),\n"
-                + "    watermark for row_time as row_time - INTERVAL '1' SECOND \n"
+        String sourceSQL = "CREATE TABLE IF not exists kafka_source_tbl(\n"
+                + "    `userId` INT,\n"
+                + "    `itemId` BIGINT,\n"
+                + "    `categoryId` INT,\n"
+                + "    `behavior` STRING,\n"
+                + "    `ts` BIGINT,\n"
+                + "    row_time as TO_TIMESTAMP(FROM_UNIXTIME(ts / 1000, 'yyyy-MM-dd HH:mm:ss')),\n"
+                + "    WATERMARK FOR row_time AS row_time - INTERVAL '1' SECOND\n"
                 + ") WITH (\n"
-                + "    'connector' = 'filesystem',   \n"
-                + "    'path' = 'file:///D:\\workspace\\flink_\\files\\UserBehavior.csv',\n"
-                + "    'format' = 'csv',\n"
-                + "    'csv.ignore-parse-errors' = 'true',\n"
-                + "    'csv.allow-comments' = 'true'\n"
+                + "    'connector' = 'kafka',\n"
+                + "    'topic' = 'user_behaviors',\n"
+                + "    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',\n"
+                + "    'properties.group.id' = 'test-group-id',\n"
+                + "    'scan.startup.mode' = 'earliest-offset',\n"
+//                + "    'scan.startup.mode' = 'timestamp',\n"
+//                + "    'scan.startup.timestamp-millis' = '1654089523897',\n"
+                + "    'format' = 'json',\n"
+                + "     'json.ignore-parse-errors' = 'true'\n"
                 + ")";
+
+//        String sourceSQL = "CREATE TABLE  IF not exists  file_source_tbl(\n"
+//                + "    user_id BIGINT,\n"
+//                + "    item_id BIGINT,\n"
+//                + "    category_id BIGINT,\n"
+//                + "    behavior STRING,\n"
+//                + "    ts BIGINT,\n"
+//                + "    row_time as TO_TIMESTAMP(FROM_UNIXTIME(ts,'yyyy-MM-dd HH:mm:ss')),\n"
+//                + "    watermark for row_time as row_time - INTERVAL '1' SECOND \n"
+//                + ") WITH (\n"
+//                + "    'connector' = 'filesystem',   \n"
+//                + "    'path' = 'file:///D:\\workspace\\flink_\\files\\UserBehavior.csv',\n"
+//                + "    'format' = 'csv',\n"
+//                + "    'csv.ignore-parse-errors' = 'true',\n"
+//                + "    'csv.allow-comments' = 'true'\n"
+//                + ")";
 
         String sinkSQL = "create table if not exists user_behavior_tbl\n"
                 + "(\n"
@@ -77,15 +77,25 @@ public class HIveConnectorSQLToHdfs {
                 + ")\n";
 
 
+//        String insertSQL = "insert into user_behavior_tbl\n"
+//                + "select CAST(user_id AS BIGINT)     as user_id,\n"
+//                + "       CAST(item_id AS INT)        as item_id,\n"
+//                + "       CAST(category_id AS BIGINT) as category_id,\n"
+//                + "       behavior,\n"
+//                + "       ts,\n"
+//                + "       DATE_FORMAT(row_time, 'yyyyMMdd'),\n"
+//                + "       DATE_FORMAT(row_time, 'HH')\n"
+//                + "from file_source_tbl";
+
         String insertSQL = "insert into user_behavior_tbl\n"
-                + "select CAST(user_id AS BIGINT)     as user_id,\n"
-                + "       CAST(item_id AS INT)        as item_id,\n"
-                + "       CAST(category_id AS BIGINT) as category_id,\n"
+                + "select CAST(userId AS BIGINT)     as user_id,\n"
+                + "       CAST(itemId AS INT)        as item_id,\n"
+                + "       CAST(categoryId AS BIGINT) as category_id,\n"
                 + "       behavior,\n"
                 + "       ts,\n"
                 + "       DATE_FORMAT(row_time, 'yyyyMMdd'),\n"
                 + "       DATE_FORMAT(row_time, 'HH')\n"
-                + "from file_source_tbl";
+                + "from kafka_source_tbl";
 
 
         tableEnv.executeSql(sourceSQL);
@@ -93,6 +103,7 @@ public class HIveConnectorSQLToHdfs {
         tableEnv.executeSql(insertSQL);
 
 //        tableEnv.executeSql("select * from file_source_tbl").print();
+//        tableEnv.executeSql("select * from kafka_source_tbl").print();
 
         /*
 
