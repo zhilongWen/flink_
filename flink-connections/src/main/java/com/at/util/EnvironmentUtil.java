@@ -43,14 +43,17 @@ public class EnvironmentUtil {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         //set default parallel
-        Optional.ofNullable(parameterTool.get(PropertiesConstants.DEFAULT_PARALLELISM)).ifPresent(p -> env.setParallelism(Integer.parseInt(p)));
+//        Optional.ofNullable(parameterTool.get(PropertiesConstants.DEFAULT_PARALLELISM)).ifPresent(p -> env.setParallelism(Integer.parseInt(p)));
+        if(parameterTool.get(PropertiesConstants.DEFAULT_PARALLELISM) != null){
+            env.setParallelism(parameterTool.getInt(PropertiesConstants.DEFAULT_PARALLELISM));
+        }
 
         // set restart strategy
         env.getConfig().setRestartStrategy(RestartStrategies.fixedDelayRestart(4, 60000));
 
         // set checkpoint config
         if (checkArgument(parameterTool.get(PropertiesConstants.ENABLE_CHECKPOINT))) {
-            CheckpointUtil.enableCheckpoint(env, parameterTool);
+            env = CheckpointUtil.enableCheckpoint(env, parameterTool);
         }
 
         // set global param
