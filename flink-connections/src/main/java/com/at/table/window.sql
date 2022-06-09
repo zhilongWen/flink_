@@ -1,3 +1,6 @@
+
+-- https://nightlies.apache.org/flink/flink-docs-release-1.15/docs/dev/table/sql/queries/window-tvf/
+
 create table if not exists bid_tbl
 (
     bidtime TIMESTAMP(3),
