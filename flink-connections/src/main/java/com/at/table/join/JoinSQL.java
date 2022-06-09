@@ -323,7 +323,7 @@ rate_table
                 + "JOIN ship_table st\n"
                 + "ON ot.order_id = st.id\n"
                 + "AND\n"
-                + "    st.ship_time between ot.order_time - interval '10' minute and ot.order_time + interval '10' minute").print();
+                + "    st.ship_time between ot.order_time - interval '10' minute and ot.order_time + interval '10' minute");
 /*
 +--------------------------------+--------------------------------+--------------------------------+-------------------------+--------------------------------+--------------------------------+-------------------------+
 |                       order_id |                          price |                       currency |              order_time |                             id |                           desc |               ship_time |
@@ -333,6 +333,40 @@ rate_table
 +--------------------------------+--------------------------------+--------------------------------+-------------------------+--------------------------------+--------------------------------+-------------------------+
 
  */
+
+
+
+        tableEnv
+                .executeSql("SELECT\n"
+                        + "    *\n"
+                        + "FROM order_table\n"
+                        + "LEFT JOIN rate_table FOR SYSTEM_TIME AS OF order_table.order_time\n"
+                        + "ON order_table.currency = rate_table.currency").print();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         env.execute();
 

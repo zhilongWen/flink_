@@ -192,3 +192,49 @@ AND
 +--------------------------------+--------------------------------+--------------------------------+-------------------------+--------------------------------+--------------------------------+-------------------------+
 
 
+-- =================================================== Event Time Temporal Join
+
+SELECT
+    order_table.currency
+FROM order_table
+LEFT JOIN rate_table FOR SYSTEM_TIME AS OF order_table.order_time
+ON order_table.currency = rate_table.currency
+
+
+-- =================================================== Processing Time Temporal Join
+
+SELECT
+    *
+FROM
+    order_table,
+     LATERAL TABLE()
+
+
+
+-- =================================================== Temporal Table Function Join
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
