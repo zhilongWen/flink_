@@ -213,14 +213,47 @@ right_table
 
 
 
+    String q4 = "select\n"
+            + "    *\n"
+            + "from\n"
+            + "(select * from table(tumble(table left_table,descriptor(row_time),interval '5' minutes))) L\n"
+            + "where L.num in (\n"
+            + "    select\n"
+            + "        num\n"
+            + "    from\n"
+            + "         (select * from table(tumble(table right_table,descriptor(row_time),interval '5' minutes))) R \n"
+            + "    where L.window_start = R.window_start and L.window_end = R.window_end\n"
+            + ")";
+
+//    tableEnv.executeSql(q4).print();
+/*
++-------------------------+-------------+--------------------------------+-------------------------+-------------------------+-------------------------+
+|                row_time |         num |                             id |            window_start |              window_end |             window_time |
++-------------------------+-------------+--------------------------------+-------------------------+-------------------------+-------------------------+
+| 2020-04-15 12:03:00.000 |           3 |                             L3 | 2020-04-15 12:00:00.000 | 2020-04-15 12:05:00.000 | 2020-04-15 12:04:59.999 |
++-------------------------+-------------+--------------------------------+-------------------------+-------------------------+-------------------------+
+ */
 
 
 
+        String q5 = "select\n"
+                + "    *\n"
+                + "from  \n"
+                + "(select * from table(tumble(table left_table,descriptor(row_time),interval '5' minutes))) L\n"
+                + "where exists(\n"
+                + "    select * from (select * from table(tumble(table right_table,descriptor(row_time),interval '5' minutes))) R\n"
+                + "    where L.num = R.num and L.window_start = R.window_start and L.window_end = R.window_end\n"
+                + ")";
 
+//        tableEnv.executeSql(q5).print();
 
-
-
-
+/*
++-------------------------+-------------+--------------------------------+-------------------------+-------------------------+-------------------------+
+|                row_time |         num |                             id |            window_start |              window_end |             window_time |
++-------------------------+-------------+--------------------------------+-------------------------+-------------------------+-------------------------+
+| 2020-04-15 12:03:00.000 |           3 |                             L3 | 2020-04-15 12:00:00.000 | 2020-04-15 12:05:00.000 | 2020-04-15 12:04:59.999 |
++-------------------------+-------------+--------------------------------+-------------------------+-------------------------+-------------------------+
+ */
 
 
 
