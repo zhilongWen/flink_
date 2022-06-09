@@ -1,4 +1,4 @@
-package com.at.table;
+package com.at.table.window;
 
 import com.at.util.EnvironmentUtil;
 import org.apache.flink.api.common.typeinfo.Types;

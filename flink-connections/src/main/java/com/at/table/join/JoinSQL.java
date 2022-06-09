@@ -1,4 +1,4 @@
-package com.at.table;
+package com.at.table.join;
 
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -35,7 +35,7 @@ public class JoinSQL {
 
         DataStream<Row> orderSource = env
                 .fromElements(
-                        Row.of("90001", 10.09, "EUR", LocalDateTime.parse("2022-06-09T12:00:00")),
+                        Row.of("90001", 10.09, "EUR", LocalDateTime.parse("2022-06-09T12:02:00")),
                         Row.of("90002", 15.50, "Dollar", LocalDateTime.parse("2022-06-09T11:56:06"))
                 )
                 .returns(
@@ -84,6 +84,60 @@ public class JoinSQL {
                                             }
                                         }));
 
+
+//        DataStream<Row> orderSource = env
+//                .fromElements(
+//                        Row.of("1", 10.09, "EUR", LocalDateTime.parse("2020-04-01T10:00:00.0")),
+//                        Row.of("2", 10.09, "EUR", LocalDateTime.parse("2020-04-01T10:02:00.0")),
+//                        Row.of("3", 10.09, "EUR", LocalDateTime.parse("2020-04-01T10:03:00.0")),
+//                        Row.of("4", 15.50, "Dollar", LocalDateTime.parse("2020-04-01T10:05:00.0"))
+//                )
+//                .returns(
+//                        Types.ROW_NAMED(
+//                                new String[]{"order_id", "price", "currency", "order_time"},
+//                                Types.STRING,
+//                                Types.DOUBLE,
+//                                Types.STRING,
+//                                Types.LOCAL_DATE_TIME
+//                        )
+//                )
+//                .assignTimestampsAndWatermarks(
+//                        WatermarkStrategy
+//                                .<Row>forBoundedOutOfOrderness(Duration.ofSeconds(0L))
+//                                .withTimestampAssigner(
+//                                        new SerializableTimestampAssigner<Row>() {
+//                                            @Override
+//                                            public long extractTimestamp(Row element, long recordTimestamp) {
+//                                                LocalDateTime file = (LocalDateTime) element.getField("order_time");
+//                                                return file.toInstant(ZoneOffset.ofHours(+8)).toEpochMilli();
+//                                            }
+//                                        }
+//                                )
+//                );
+//
+//        DataStream<Row> shipmentSource = env
+//                .fromElements(
+//                        Row.of("1", "十月稻田 长粒香大米 东北大米 东北香米 5kg等3件商品", LocalDateTime.parse("2020-04-01T11:00:00.0")),
+//                        Row.of("2", "Redmi 10X 4G Helio G85游戏芯 4800万超清四摄 5020mAh大电量 小孔全面屏 128GB大存储 4GB+128GB 冰雾白 游戏智能手机 小米 红米等5件商品", LocalDateTime.parse("2020-04-01T17:00:00.0")),
+//                        Row.of("3", "索芙特i-Softto 口红不掉色唇膏保湿滋润 璀璨金钻哑光唇膏 Y01复古红 百搭气质 璀璨金钻哑光唇膏 等8件商品", LocalDateTime.parse("2020-04-01T12:00:00.0")),
+//                        Row.of("4", "TCL 75Q10 75英寸 QLED原色量子点电视 安桥音响 AI声控智慧屏 超薄全面屏 MEMC防抖 3+32GB 平板电视等7件商品", LocalDateTime.parse("2020-04-01T11:30:00.0"))
+//                )
+//                .assignTimestampsAndWatermarks(
+//                        WatermarkStrategy
+//                                .<Row>forBoundedOutOfOrderness(Duration.ofSeconds(0l))
+//                                .withTimestampAssigner(
+//                                        new SerializableTimestampAssigner<Row>() {
+//                                            @Override
+//                                            public long extractTimestamp(Row element, long recordTimestamp) {
+//
+//                                                LocalDateTime field = (LocalDateTime) element.getField(2);
+//
+//                                                return field.toInstant(ZoneOffset.ofHours(+8)).toEpochMilli();
+//
+//                                            }
+//                                        }));
+
+
         DataStream<Row> rateSource = env
                 .fromElements(
                         Row.of("Dollar", 102.00),
@@ -131,9 +185,9 @@ public class JoinSQL {
         tableEnv.createTemporaryView("rate_table", rateTable);
 
 
-//        tableEnv.executeSql("select * from order_table").print();
-//        tableEnv.executeSql("select * from ship_table").print();
-//        tableEnv.executeSql("select * from rate_table").print();
+        tableEnv.executeSql("select * from order_table").print();
+        tableEnv.executeSql("select * from ship_table").print();
+        tableEnv.executeSql("select * from rate_table").print();
 
 /*
 
@@ -224,18 +278,61 @@ rate_table
  */
 
 
-        String intervalJionSQL = "SELECT\n"
+
+        tableEnv.executeSql("SELECT \n"
+                + "    *\n"
+                + "FROM order_table AS ot\n"
+                + "JOIN ship_table AS st \n"
+                + "on ot.order_id = st.id \n"
+                + "AND\n"
+                + "   ot.order_time BETWEEN st.ship_time - INTERVAL '4' HOUR AND ship_time;")/*.print()*/;
+/*
++--------------------------------+--------------------------------+--------------------------------+-------------------------+--------------------------------+--------------------------------+-------------------------+
+|                       order_id |                          price |                       currency |              order_time |                             id |                           desc |               ship_time |
++--------------------------------+--------------------------------+--------------------------------+-------------------------+--------------------------------+--------------------------------+-------------------------+
+|                              1 |                          10.09 |                            EUR | 2020-04-01 10:00:00.000 |                              1 |  十月稻田 长粒香大米 东北大... | 2020-04-01 11:00:00.000 |
+|                              3 |                          10.09 |                            EUR | 2020-04-01 10:03:00.000 |                              3 | 索芙特i-Softto 口红不掉色唇... | 2020-04-01 12:00:00.000 |
+|                              4 |                           15.5 |                         Dollar | 2020-04-01 10:05:00.000 |                              4 | TCL 75Q10 75英寸 QLED原色量... | 2020-04-01 11:30:00.000 |
++--------------------------------+--------------------------------+--------------------------------+-------------------------+--------------------------------+--------------------------------+-------------------------+
+ */
+
+
+        tableEnv.executeSql("SELECT \n"
+                + "    *\n"
+                + "FROM order_table ot \n"
+                + "JOIN ship_table st \n"
+                + "ON ot.order_id = st.id\n"
+                + "AND \n"
+                + "   ot.order_time between st.ship_time - interval '10' minute and st.ship_time")/*.print()*/;
+/*
++--------------------------------+--------------------------------+--------------------------------+-------------------------+--------------------------------+--------------------------------+-------------------------+
+|                       order_id |                          price |                       currency |              order_time |                             id |                           desc |               ship_time |
++--------------------------------+--------------------------------+--------------------------------+-------------------------+--------------------------------+--------------------------------+-------------------------+
+|                          90001 |                          10.09 |                            EUR | 2022-06-09 12:02:00.000 |                          90001 |  十月稻田 长粒香大米 东北大... | 2022-06-09 12:09:00.000 |
++--------------------------------+--------------------------------+--------------------------------+-------------------------+--------------------------------+--------------------------------+-------------------------+
+
+
+ */
+
+
+
+
+        tableEnv.executeSql("SELECT\n"
                 + "    *\n"
                 + "FROM order_table ot\n"
-                + "RIGHT JOIN ship_table st\n"
+                + "JOIN ship_table st\n"
                 + "ON ot.order_id = st.id\n"
-                + "AND st.ship_time BETWEEN ot.order_time - INTERVAL '10' MINUTE AND ot.order_time + INTERVAL '10' MINUTE";
+                + "AND\n"
+                + "    st.ship_time between ot.order_time - interval '10' minute and ot.order_time + interval '10' minute").print();
+/*
++--------------------------------+--------------------------------+--------------------------------+-------------------------+--------------------------------+--------------------------------+-------------------------+
+|                       order_id |                          price |                       currency |              order_time |                             id |                           desc |               ship_time |
++--------------------------------+--------------------------------+--------------------------------+-------------------------+--------------------------------+--------------------------------+-------------------------+
+|                          90001 |                          10.09 |                            EUR | 2022-06-09 12:02:00.000 |                          90001 |  十月稻田 长粒香大米 东北大... | 2022-06-09 12:09:00.000 |
+|                          90002 |                           15.5 |                         Dollar | 2022-06-09 11:56:06.000 |                          90002 |  Redmi 10X 4G Helio G85游戏... | 2022-06-09 11:50:05.000 |
++--------------------------------+--------------------------------+--------------------------------+-------------------------+--------------------------------+--------------------------------+-------------------------+
 
-        tableEnv.executeSql(innerJoinSQL).print();
-
-
-
-
+ */
 
         env.execute();
 

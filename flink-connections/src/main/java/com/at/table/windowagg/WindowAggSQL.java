@@ -1,4 +1,4 @@
-package com.at.table;
+package com.at.table.windowagg;
 
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
