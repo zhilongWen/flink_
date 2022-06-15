@@ -54,6 +54,7 @@ public class FunctionSQL {
 //        tableEnv.executeSql("select str_to_map('k1=v1,k2=v2')['k1'] var1").print();
 
 
+        tableEnv.executeSql("select date_format('2017-09-15 07:29:00','HH')").print();
 
 
 

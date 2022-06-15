@@ -21,11 +21,11 @@ under the License.
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.at</groupId>
-	<artifactId>flink-connections</artifactId>
+	<artifactId>flink-connectors</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>flink-connections</name>
+	<name>flink-connectors</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -356,7 +356,17 @@ under the License.
 		</dependency>
 
 
+		<dependency>
+			<groupId>org.apache.parquet</groupId>
+			<artifactId>parquet-avro</artifactId>
+			<version>1.12.2</version>
+		</dependency>
 
+		<dependency>
+			<groupId>org.apache.parquet</groupId>
+			<artifactId>parquet-column</artifactId>
+			<version>1.12.2</version>
+		</dependency>
 
 
 
