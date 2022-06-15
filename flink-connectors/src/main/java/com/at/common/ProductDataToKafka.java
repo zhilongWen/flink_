@@ -1,12 +1,17 @@
 package com.at.common;
 
 import com.alibaba.fastjson2.JSON;
-import com.at.pojo.UserBehavior;
-import com.sun.org.apache.bcel.internal.generic.NEW;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
+import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +27,7 @@ public class ProductDataToKafka {
     private  static Random random = new Random();
 
     private static void write() throws Exception{
+
 
         UserBehavior userBehavior = UserBehavior
                 .builder()
@@ -66,6 +72,47 @@ public class ProductDataToKafka {
 
     }
 
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    @Data
+    public static class UserBehavior {
+
+        //用户ID
+        public int userId;
+        //商品ID
+        public long itemId;
+        //商品类目ID
+        public  int categoryId;
+        //用户行为，包括{"pv","buy","cart", "fav"}
+        public String behavior;
+        //行为发生的时间戳，单位秒
+        public long ts;
+
+        @Override
+        public String toString() {
+            return "UserBehavior{" +
+                    "userId=" + userId +
+                    ", itemId=" + itemId +
+                    ", categoryId=" + categoryId +
+                    ", behavior='" + behavior + '\'' +
+                    ", ts=" + new Timestamp(ts) +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            UserBehavior that = (UserBehavior) o;
+            return userId == that.userId && itemId == that.itemId && categoryId == that.categoryId && ts == that.ts && Objects.equals(behavior, that.behavior);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(userId, itemId, categoryId, behavior, ts);
+        }
+    }
 
 
 

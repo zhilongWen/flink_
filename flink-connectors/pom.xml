@@ -112,6 +112,7 @@ under the License.
 			<version>${flink.version}</version>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java</artifactId>
@@ -347,13 +348,13 @@ under the License.
 			<version>8.0.28</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.hudi</groupId>
-			<artifactId>hudi-flink-bundle_2.12</artifactId>
-			<version>0.11.0</version>
-			<systemPath>${consumer.lib}/hudi-flink1.14-bundle_2.12-0.11.0.jar</systemPath>
-			<scope>system</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.apache.hudi</groupId>-->
+<!--			<artifactId>hudi-flink-bundle_2.12</artifactId>-->
+<!--			<version>0.11.0</version>-->
+<!--			<systemPath>${consumer.lib}/hudi-flink1.14-bundle_2.12-0.11.0.jar</systemPath>-->
+<!--			<scope>system</scope>-->
+<!--		</dependency>-->
 
 
 		<dependency>
