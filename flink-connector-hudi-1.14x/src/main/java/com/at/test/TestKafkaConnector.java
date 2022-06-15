@@ -1,5 +1,6 @@
 package com.at.test;
 
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -11,7 +12,14 @@ public class TestKafkaConnector {
 
     public static void main(String[] args) {
 
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+        Configuration configuration = new Configuration();
+        configuration.setString("parallelism.default",String.valueOf(1));
+        configuration.setString("rest.port",String.valueOf(8081));
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(configuration);
+
+
+//        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         env.setParallelism(1);
 

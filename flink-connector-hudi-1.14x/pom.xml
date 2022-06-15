@@ -90,6 +90,13 @@ under the License.
 		</dependency>
 		-->
 
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-runtime-web_${scala.binary.version}</artifactId>
+			<version>${flink.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- flink sql -->
 		<dependency>
 			<groupId>org.apache.flink</groupId>
@@ -198,6 +205,20 @@ under the License.
 
 
 		<!-- hudi -->
+		<!-- https://mvnrepository.com/artifact/org.apache.hudi/hudi-client -->
+		<dependency>
+			<groupId>org.apache.hudi</groupId>
+			<artifactId>hudi-client</artifactId>
+			<version>${hudi.version}</version>
+			<type>pom</type>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.hudi/hudi-flink-client -->
+		<dependency>
+			<groupId>org.apache.hudi</groupId>
+			<artifactId>hudi-flink-client</artifactId>
+			<version>${hudi.version}</version>
+		</dependency>
 
 
 		<dependency>
