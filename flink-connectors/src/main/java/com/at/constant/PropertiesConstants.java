@@ -1,9 +1,10 @@
 package com.at.constant;
 
 /**
- * @create 2022-06-04
+ * @create 2022-06-15
  */
 public class PropertiesConstants {
+
 
     // --default.parallelism 1 --enable.checkpoint true --checkpoint.type fs --checkpoint.dir file:///D:\\workspace\\flink_\\files\\ck --checkpoint.interval 60000 --enable.table.env true
 
@@ -33,8 +34,6 @@ public class PropertiesConstants {
 
     // kafka
     public static final String KAFKA_BOOTSTRAP_SERVERS = "bootstrap.servers";
-
-
 
 
 

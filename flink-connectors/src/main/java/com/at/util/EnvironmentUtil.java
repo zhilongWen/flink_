@@ -24,8 +24,9 @@ public class EnvironmentUtil {
 
     private static ParameterTool buildParameterTool(final String[] args) {
         try {
+
             return ParameterTool
-                    .fromPropertiesFile(EnvironmentUtil.class.getResourceAsStream(PropertiesConstants.DEFAULT_PROPERTIES))
+                    .fromPropertiesFile(EnvironmentUtil.class.getResourceAsStream(com.at.constant.PropertiesConstants.DEFAULT_PROPERTIES))
                     .mergeWith(ParameterTool.fromArgs(args))
                     .mergeWith(ParameterTool.fromSystemProperties());
         } catch (IOException e) {

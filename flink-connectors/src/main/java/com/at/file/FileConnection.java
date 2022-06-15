@@ -3,7 +3,6 @@ package com.at.file;
 import com.at.pojo.ItemViewCount;
 import com.at.pojo.UserBehavior;
 import com.at.proto.ItemViewCountProto;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.apache.avro.Schema;
 import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
@@ -50,7 +49,6 @@ import org.apache.hadoop.hive.ql.exec.vector.BytesColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.LongColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;

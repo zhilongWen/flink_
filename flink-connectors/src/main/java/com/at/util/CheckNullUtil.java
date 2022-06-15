@@ -1,10 +1,8 @@
 package com.at.util;
 
 import com.at.constant.PropertiesConstants;
-import javolution.io.Struct;
 import org.apache.flink.api.java.utils.ParameterTool;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 
 /**
