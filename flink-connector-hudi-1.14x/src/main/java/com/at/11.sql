@@ -29,19 +29,22 @@ SET 'execution.checkpointing.interval' = '2s';
 
 SET 'sql-client.execution.result-mode' = 'tableau';
 
---SET table.sql-dialect = default;
+--
+SET table.sql -dialect = default;
 
 -- {"behavior":"buy","categoryId":11,"itemId":9041315780322777012,"ts":1655295511133,"userId":10}
 
-create table if not exists hudi_user_behavior_tbl(
-     userId int,
-     itemId bigint,
-     categoryId int,
-     behavior string,
-     ts bigint,
-     row_time as to_timestamp(from_unixtime(ts / 1000,'yyyy-MM-dd HH:mm:ss')),
-     watermark for row_time as row_time - interval '1' second
-)with(
+create table if not exists hudi_user_behavior_tbl
+(
+    userId     int,
+    itemId     bigint,
+    categoryId int,
+    behavior string,
+    ts         bigint,
+    row_time   as to_timestamp(from_unixtime(ts / 1000,'yyyy-MM-dd HH:mm:ss')),
+    watermark for row_time as row_time - interval '1' second
+)
+with (
     'connector' = 'kafka',
     'topic' = 'user_behaviors',
     'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',
@@ -52,21 +55,21 @@ create table if not exists hudi_user_behavior_tbl(
 )
 
 
-select
-    userId as user_id,
-    itemId as item_id,
-    categoryId as category_id,
-    behavior,
-    ts,
-    row_time,
-    date_format(cast(row_time as string),'yyyyMMdd') dt,
-    date_format(cast(row_time as string),'HH') hh,
-    date_format(cast(row_time as string),'mm') mm
+select userId     as                                     user_id,
+       itemId     as                                     item_id,
+       categoryId as                                     category_id,
+       behavior,
+       ts,
+       row_time,
+       date_format(cast(row_time as string), 'yyyyMMdd') dt,
+       date_format(cast(row_time as string), 'HH')       hh,
+       date_format(cast(row_time as string), 'mm')       mm
 from hudi_user_behavior_tbl
 
 
 -- ==============================================================
-CREATE EXTERNAL TABLE `user_behavior_hms_mor_tbl`(
+CREATE
+EXTERNAL TABLE `user_behavior_hms_mor_tbl`(
   `_hoodie_commit_time` string,
   `_hoodie_commit_seqno` string,
   `_hoodie_record_key` string,
@@ -94,15 +97,16 @@ TBLPROPERTIES (
 -- ==============================================================
 
 
-create table if not exists user_behavior_hms_mor(
-                                                    user_id int,
-                                                    item_id bigint,
-                                                    category_id int,
-                                                    behavior string,
-                                                    ts bigint,
-                                                    `dt` string,
-                                                    `hh` string,
-                                                    `mm` string
+create table if not exists user_behavior_hms_mor
+(
+    user_id     int,
+    item_id     bigint,
+    category_id int,
+    behavior string,
+    ts          bigint,
+    `dt` string,
+    `hh` string,
+    `mm` string
 )partitioned by (`dt`,`hh`,`mm`)
 with(
     'connector'='hudi',
@@ -127,15 +131,16 @@ with(
 )
 
 
-create table if not exists user_behavior_hms_cow(
-                                                    user_id int,
-                                                    item_id bigint,
-                                                    category_id int,
-                                                    behavior string,
-                                                    ts bigint,
-                                                    `dt` string,
-                                                    `hh` string,
-                                                    `mm` string
+create table if not exists user_behavior_hms_cow
+(
+    user_id     int,
+    item_id     bigint,
+    category_id int,
+    behavior string,
+    ts          bigint,
+    `dt` string,
+    `hh` string,
+    `mm` string
 )partitioned by (`dt`,`hh`,`mm`)
 with(
     'connector'='hudi',
@@ -161,18 +166,46 @@ with(
 
 
 
-
 insert into user_behavior_hms_cow
-select
-    userId as user_id,
-    itemId as item_id,
-    categoryId as category_id,
-    behavior,
-    ts,
-    date_format(cast(row_time as string),'yyyyMMdd') dt,
-    date_format(cast(row_time as string),'HH') hh,
-    date_format(cast(row_time as string),'mm') mm
+select userId     as                                     user_id,
+       itemId     as                                     item_id,
+       categoryId as                                     category_id,
+       behavior,
+       ts,
+       date_format(cast(row_time as string), 'yyyyMMdd') dt,
+       date_format(cast(row_time as string), 'HH')       hh,
+       date_format(cast(row_time as string), 'mm')       mm
 from hudi_user_behavior_tbl
+
+
+create table if not exists source_order_tbl
+(
+    db_name STRING METADATA FROM 'database_name' VIRTUAL,
+    table_name STRING METADATA FROM 'table_name' VIRTUAL,
+    operation_ts TIMESTAMP_LTZ(3) METADATA FROM 'op_ts' VIRTUAL,
+    order_id     INT,
+    order_date   TIMESTAMP(3),
+    customer_name string,
+    price        double,
+    product_id   INT,
+    order_status BOOLEAN,
+    ts           TIMESTAMP(3),
+    primary key (order_id) NOT ENFORCED
+)
+with (
+    'connector' = 'mysql-cdc',
+    'hostname' = 'hadoop102',
+    'port' = '3306',
+    'username' = 'root',
+    'password' = 'root',
+    'connect.timeout' = '30s',
+    'connect.max-retries' = '3',
+    'connection.pool.size' = '5',
+    'jdbc.properties.useSSL' = 'false',
+    'jdbc.properties.characterEncoding' = 'utf-8',
+    'database-name' = 'gmall_report',
+    'table-name' = 'orders_tbl'
+)
 
 
 
