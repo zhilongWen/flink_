@@ -1,5 +1,7 @@
 
 
+-- https://zhuanlan.zhihu.com/p/471842018
+
 -- hive 如何读 hudi 表 https://www.yuque.com/docs/share/879349ce-7de4-4284-9126-9c2a3c93a91d?#%20%E3%80%8AHive%20On%20Hudi%E3%80%8B
 
 -- mysql table
