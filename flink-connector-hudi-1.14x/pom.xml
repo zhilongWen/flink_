@@ -192,21 +192,6 @@ under the License.
         </dependency>
 
 
-        <!-- hudi -->
-
-        <dependency>
-            <groupId>org.apache.hudi</groupId>
-            <artifactId>hudi-flink1.14-bundle_2.12</artifactId>
-            <version>0.11.0</version>
-            <systemPath>${consumer.lib}/hudi-flink1.14-bundle_2.12-0.11.0.jar</systemPath>
-            <scope>system</scope>
-        </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>org.apache.hudi</groupId>-->
-<!--            <artifactId>hudi-hadoop-mr-bundle</artifactId>-->
-<!--            <version>0.11.0</version>-->
-<!--        </dependency>-->
 
         <!-- kafka connector -->
         <dependency>
@@ -222,39 +207,31 @@ under the License.
             <scope>provided</scope>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.apache.flink</groupId>-->
-<!--            <artifactId>flink-avro-confluent-registry</artifactId>-->
-<!--            <version>1.13.2</version>-->
-<!--            <systemPath>${consumer.lib}/flink-sql-avro-confluent-registry-1.14.2.jar</systemPath>-->
-<!--            <scope>system</scope>-->
-<!--        </dependency>-->
 
-<!--        <dependency>-->
-<!--            <groupId>org.apache.flink</groupId>-->
-<!--            <artifactId>flink-orc_${scala.binary.version}</artifactId>-->
-<!--            <version>${flink.version}</version>-->
-<!--        </dependency>-->
+        <!-- hudi 放到 hive-exec 依赖的上面 否则 java.lang.NoSuchMethodError: org.apache.parquet.schema.Types$PrimitiveBuilder.as(Lorg/apache/parquet/schema/LogicalTypeAnnotation;)Lorg/apache/parquet/schema/Types$Builder; -->
+
+        <dependency>
+            <groupId>org.apache.hudi</groupId>
+            <artifactId>hudi-flink1.14-bundle_2.12</artifactId>
+            <version>0.11.0</version>
+            <systemPath>${consumer.lib}/hudi-flink1.14-bundle_2.12-0.11.0.jar</systemPath>
+            <scope>system</scope>
+        </dependency>
 
 
         <!-- hive  -->
-
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-hive_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.hive</groupId>
             <artifactId>hive-exec</artifactId>
             <version>3.1.2</version>
+            <scope>provided</scope>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>org.apache.avro</groupId>-->
-<!--            <artifactId>avro</artifactId>-->
-<!--            <version>1.10.0</version>-->
-<!--        </dependency>-->
 
 
     </dependencies>
