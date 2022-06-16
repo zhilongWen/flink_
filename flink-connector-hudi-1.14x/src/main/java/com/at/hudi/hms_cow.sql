@@ -200,9 +200,12 @@ from hudi_user_behavior_tbl
 
 alter table user_behavior_hms_cow_tbl add if not exists partition(`dt`='20220615',`hh`='20',`mm`='17') location 'hdfs://hadoop102:8020/user/warehouse/user_behavior_hms_cow_tbl/20220615/20/17';
 
--- 修复表数据
-msck repair table user_behavior_hms_cow_tbl;
-
+-- 修复表数据 set hive.msck.path.validation=ignore msck repair table user_behavior_hms_cow_tbl
+0: jdbc:hive2://hadoop102:10000> msck repair table user_behavior_hms_cow_tbl;
+Error: Error while processing statement: FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask (state=08S01,code=1)
+0: jdbc:hive2://hadoop102:10000> set hive.msck.path.validation=ignore;
+No rows affected (0.004 seconds)
+0: jdbc:hive2://hadoop102:10000> msck repair table user_behavior_hms_cow_tbl;
 
 
 
