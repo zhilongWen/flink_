@@ -1,4 +1,10 @@
 /*
+
+	//https://blog.csdn.net/dudu146863/article/details/120151688
+	//https://blog.csdn.net/weixin_44131414/article/details/122983339
+	https://www.jianshu.com/p/0cf7cd00eb00
+
+
 init.sql
 
 create catalog myhive with('type'='hive','hive-conf-dir'='/opt/module/hive-3.1.2/conf','default-database'='default','hive-version'='3.1.2','hadoop-conf-dir'='/opt/module/hadoop-3.1.3/etc/hadoop');

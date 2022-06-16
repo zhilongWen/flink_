@@ -32,8 +32,7 @@ import org.apache.flink.api.java.ExecutionEnvironment;
  */
 public class BatchJob {
 
-	//https://blog.csdn.net/dudu146863/article/details/120151688
-	//https://blog.csdn.net/weixin_44131414/article/details/122983339
+
 
 	public static void main(String[] args) throws Exception {
 		// set up the batch execution environment

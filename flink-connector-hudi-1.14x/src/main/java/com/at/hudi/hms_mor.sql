@@ -1,3 +1,21 @@
+
+/*
+ 	//https://blog.csdn.net/dudu146863/article/details/120151688
+	//https://blog.csdn.net/weixin_44131414/article/details/122983339
+	https://www.jianshu.com/p/0cf7cd00eb00
+
+drop table hudi_user_behavior_tbl;
+drop table user_behavior_hms_mor;
+drop table user_behavior_hms_mor_tbl_ro;
+drop table user_behavior_hms_mor_tbl_rt;
+
+
+
+hadoop fs -rm -r /user/warehouse/user_behavior_hms_mor_tbl
+
+ */
+
+
 create table if not exists hudi_user_behavior_tbl
 (
     userId     int,
@@ -38,7 +56,7 @@ with(
     'hoodie.datasource.write.recordkey.field' = 'user_id',
     'write.precombine.field'= 'ts',
     'write.tasks'='1',
-    'write.rate.limit'= '2000',
+    'write.rate.limit'= '100',
     'compaction.tasks'='1',
     'compaction.async.enabled'= 'true',
     'compaction.trigger.strategy'= 'num_and_time',

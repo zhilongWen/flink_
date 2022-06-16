@@ -1,9 +1,7 @@
 package com.at.hudi;
 
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.SqlDialect;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
@@ -11,7 +9,33 @@ import org.apache.flink.table.catalog.hive.HiveCatalog;
 /**
  * @create 2022-06-15
  */
-public class KafkaToHudi {
+public class HmsMOR {
+
+    /*
+ java.lang.NoSuchMethodError: org.apache.parquet.schema.Types$PrimitiveBuilder.as(Lorg/apache/parquet/schema/LogicalTypeAnnotation;)Lorg/apache/parquet/schema/Types$Builder;
+	at org.apache.parquet.avro.AvroSchemaConverter.convertField(AvroSchemaConverter.java:177)
+	at org.apache.parquet.avro.AvroSchemaConverter.convertUnion(AvroSchemaConverter.java:242)
+	at org.apache.parquet.avro.AvroSchemaConverter.convertField(AvroSchemaConverter.java:199)
+	at org.apache.parquet.avro.AvroSchemaConverter.convertField(AvroSchemaConverter.java:152)
+	at org.apache.parquet.avro.AvroSchemaConverter.convertField(AvroSchemaConverter.java:260)
+	at org.apache.parquet.avro.AvroSchemaConverter.convertFields(AvroSchemaConverter.java:146)
+	at org.apache.parquet.avro.AvroSchemaConverter.convert(AvroSchemaConverter.java:137)
+	at org.apache.hudi.common.table.TableSchemaResolver.readSchemaFromLogFile(TableSchemaResolver.java:555)
+	at org.apache.hudi.common.table.TableSchemaResolver.readSchemaFromLogFile(TableSchemaResolver.java:538)
+	at org.apache.hudi.common.table.TableSchemaResolver.getTableParquetSchemaFromDataFile(TableSchemaResolver.java:115)
+	at org.apache.hudi.common.table.TableSchemaResolver.getTableAvroSchemaFromDataFile(TableSchemaResolver.java:148)
+	at org.apache.hudi.common.table.TableSchemaResolver.hasOperationField(TableSchemaResolver.java:565)
+	at org.apache.hudi.common.table.TableSchemaResolver.<init>(TableSchemaResolver.java:82)
+	at org.apache.hudi.sync.common.AbstractSyncHoodieClient.getDataSchema(AbstractSyncHoodieClient.java:164)
+	at org.apache.hudi.hive.HiveSyncTool.syncHoodieTable(HiveSyncTool.java:204)
+	at org.apache.hudi.hive.HiveSyncTool.doSync(HiveSyncTool.java:154)
+	at org.apache.hudi.hive.HiveSyncTool.syncHoodieTable(HiveSyncTool.java:138)
+	at org.apache.hudi.sink.StreamWriteOperatorCoordinator.doSyncHive(StreamWriteOperatorCoordinator.java:337)
+	at org.apache.hudi.sink.utils.NonThrownExecutor.lambda$execute$0(NonThrownExecutor.java:93)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:748)
+     */
 
     public static void main(String[] args) {
 
@@ -26,7 +50,7 @@ public class KafkaToHudi {
 
         String name = "myhive";
         String defaultDatabase = "default";
-        String hiveConfDir = "D:\\workspace\\workspace2021\\bigdata-learn\\hive-test\\src\\main\\resources\\conf";
+        String hiveConfDir = "./conf";
         String version = "3.1.2";
 
         HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir, version);
@@ -40,15 +64,17 @@ public class KafkaToHudi {
 
         tableEnv.getConfig().setSqlDialect(SqlDialect.DEFAULT);
 
-        String sourceSQL = "create table if not exists hudi_user_behavior_tbl(\n"
-                + "     userId int,\n"
-                + "     itemId bigint,\n"
-                + "     categoryId int,\n"
-                + "     behavior string,\n"
-                + "     ts bigint,\n"
-                + "     row_time as to_timestamp(from_unixtime(ts / 1000,'yyyy-MM-dd HH:mm:ss')),\n"
-                + "     watermark for row_time as row_time - interval '1' second\n"
-                + ")with(\n"
+        String sourceSQL = "create table if not exists hudi_user_behavior_tbl\n"
+                + "(\n"
+                + "    userId     int,\n"
+                + "    itemId     bigint,\n"
+                + "    categoryId int,\n"
+                + "    behavior string,\n"
+                + "    ts         bigint,\n"
+                + "    row_time   as to_timestamp(from_unixtime(ts / 1000,'yyyy-MM-dd HH:mm:ss')),\n"
+                + "    watermark for row_time as row_time - interval '1' second\n"
+                + ")\n"
+                + "with (\n"
                 + "    'connector' = 'kafka',\n"
                 + "    'topic' = 'user_behaviors',\n"
                 + "    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',\n"
@@ -77,7 +103,7 @@ public class KafkaToHudi {
                 + "    'hoodie.datasource.write.recordkey.field' = 'user_id',\n"
                 + "    'write.precombine.field'= 'ts',\n"
                 + "    'write.tasks'='1',\n"
-                + "    'write.rate.limit'= '2000',\n"
+                + "    'write.rate.limit'= '100',\n"
                 + "    'compaction.tasks'='1',\n"
                 + "    'compaction.async.enabled'= 'true',\n"
                 + "    'compaction.trigger.strategy'= 'num_and_time',\n"
@@ -103,7 +129,7 @@ public class KafkaToHudi {
                 + "    date_format(cast(row_time as string),'yyyyMMdd') dt,\n"
                 + "    date_format(cast(row_time as string),'HH') hh,\n"
                 + "    date_format(cast(row_time as string),'mm') mm\n"
-                + "from hudi_user_behavior_tbl";
+                + "from hudi_user_behavior_tbl\n";
 
         tableEnv.executeSql(sourceSQL);
         tableEnv.executeSql(hudiSinkSQL);
