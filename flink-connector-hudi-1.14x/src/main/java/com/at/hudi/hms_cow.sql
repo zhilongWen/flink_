@@ -200,8 +200,8 @@ from hudi_user_behavior_tbl
 
 alter table user_behavior_hms_cow_tbl add if not exists partition(`dt`='20220615',`hh`='20',`mm`='17') location 'hdfs://hadoop102:8020/user/warehouse/user_behavior_hms_cow_tbl/20220615/20/17';
 
-
-
+-- 修复表数据
+msck repair table user_behavior_hms_cow_tbl;
 
 
 
