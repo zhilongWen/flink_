@@ -88,6 +88,118 @@ from hudi_user_behavior_tbl
 -- ==============================================================================================
 -- hive table
 -- ==============================================================================================
+    0: jdbc:hive2://hadoop102:10000> desc formatted user_behavior_hms_cow_tbl;
++-------------------------------+----------------------------------------------------+----------------------------------------------------+
+|           col_name            |                     data_type                      |                      comment                       |
++-------------------------------+----------------------------------------------------+----------------------------------------------------+
+| # col_name                    | data_type                                          | comment                                            |
+| _hoodie_commit_time           | string                                             |                                                    |
+| _hoodie_commit_seqno          | string                                             |                                                    |
+| _hoodie_record_key            | string                                             |                                                    |
+| _hoodie_partition_path        | string                                             |                                                    |
+| _hoodie_file_name             | string                                             |                                                    |
+| user_id                       | int                                                |                                                    |
+| item_id                       | bigint                                             |                                                    |
+| category_id                   | int                                                |                                                    |
+| behavior                      | string                                             |                                                    |
+| ts                            | bigint                                             |                                                    |
+|                               | NULL                                               | NULL                                               |
+| # Partition Information       | NULL                                               | NULL                                               |
+| # col_name                    | data_type                                          | comment                                            |
+| dt                            | string                                             |                                                    |
+| hh                            | string                                             |                                                    |
+| mm                            | string                                             |                                                    |
+|                               | NULL                                               | NULL                                               |
+| # Detailed Table Information  | NULL                                               | NULL                                               |
+| Database:                     | default                                            | NULL                                               |
+| OwnerType:                    | USER                                               | NULL                                               |
+| Owner:                        | zero                                               | NULL                                               |
+| CreateTime:                   | Thu Jun 16 19:18:53 CST 2022                       | NULL                                               |
+| LastAccessTime:               | UNKNOWN                                            | NULL                                               |
+| Retention:                    | 0                                                  | NULL                                               |
+| Location:                     | hdfs://hadoop102:8020/user/warehouse/user_behavior_hms_cow_tbl | NULL                                               |
+| Table Type:                   | EXTERNAL_TABLE                                     | NULL                                               |
+| Table Parameters:             | NULL                                               | NULL                                               |
+|                               | EXTERNAL                                           | TRUE                                               |
+|                               | last_commit_time_sync                              | 20220616191915729                                  |
+|                               | numFiles                                           | 181                                                |
+|                               | numPartitions                                      | 20                                                 |
+|                               | numRows                                            | 0                                                  |
+|                               | rawDataSize                                        | 0                                                  |
+|                               | spark.sql.sources.provider                         | hudi                                               |
+|                               | spark.sql.sources.schema.numPartCols               | 3                                                  |
+|                               | spark.sql.sources.schema.numParts                  | 1                                                  |
+|                               | spark.sql.sources.schema.part.0                    | {\"type\":\"struct\",\"fields\":[{\"name\":\"_hoodie_commit_time\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"_hoodie_commit_seqno\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"_hoodie_record_key\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"_hoodie_partition_path\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"_hoodie_file_name\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"user_id\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}},{\"name\":\"item_id\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"category_id\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}},{\"name\":\"behavior\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"ts\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"dt\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"hh\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"mm\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}}]} |
+|                               | spark.sql.sources.schema.partCol.0                 | dt                                                 |
+|                               | spark.sql.sources.schema.partCol.1                 | hh                                                 |
+|                               | spark.sql.sources.schema.partCol.2                 | mm                                                 |
+|                               | totalSize                                          | 78392506                                           |
+|                               | transient_lastDdlTime                              | 1655378333                                         |
+|                               | NULL                                               | NULL                                               |
+| # Storage Information         | NULL                                               | NULL                                               |
+| SerDe Library:                | org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe | NULL                                               |
+| InputFormat:                  | org.apache.hudi.hadoop.HoodieParquetInputFormat    | NULL                                               |
+| OutputFormat:                 | org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat | NULL                                               |
+| Compressed:                   | No                                                 | NULL                                               |
+| Num Buckets:                  | 0                                                  | NULL                                               |
+| Bucket Columns:               | []                                                 | NULL                                               |
+| Sort Columns:                 | []                                                 | NULL                                               |
+| Storage Desc Params:          | NULL                                               | NULL                                               |
+|                               | hoodie.query.as.ro.table                           | false                                              |
+|                               | path                                               | hdfs://hadoop102:8020/user/warehouse/user_behavior_hms_cow_tbl |
+|                               | serialization.format                               | 1                                                  |
++-------------------------------+----------------------------------------------------+----------------------------------------------------+
+
+
+
+0: jdbc:hive2://hadoop102:10000> show create table user_behavior_hms_cow_tbl;
++----------------------------------------------------+
+|                   createtab_stmt                   |
++----------------------------------------------------+
+| CREATE EXTERNAL TABLE `user_behavior_hms_cow_tbl`( |
+|   `_hoodie_commit_time` string COMMENT '',         |
+|   `_hoodie_commit_seqno` string COMMENT '',        |
+|   `_hoodie_record_key` string COMMENT '',          |
+|   `_hoodie_partition_path` string COMMENT '',      |
+|   `_hoodie_file_name` string COMMENT '',           |
+|   `user_id` int COMMENT '',                        |
+|   `item_id` bigint COMMENT '',                     |
+|   `category_id` int COMMENT '',                    |
+|   `behavior` string COMMENT '',                    |
+|   `ts` bigint COMMENT '')                          |
+| PARTITIONED BY (                                   |
+|   `dt` string COMMENT '',                          |
+|   `hh` string COMMENT '',                          |
+|   `mm` string COMMENT '')                          |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'  |
+| WITH SERDEPROPERTIES (                             |
+|   'hoodie.query.as.ro.table'='false',              |
+|   'path'='hdfs://hadoop102:8020/user/warehouse/user_behavior_hms_cow_tbl')  |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hudi.hadoop.HoodieParquetInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://hadoop102:8020/user/warehouse/user_behavior_hms_cow_tbl' |
+| TBLPROPERTIES (                                    |
+|   'last_commit_time_sync'='20220616191915729',     |
+|   'spark.sql.sources.provider'='hudi',             |
+|   'spark.sql.sources.schema.numPartCols'='3',      |
+|   'spark.sql.sources.schema.numParts'='1',         |
+|   'spark.sql.sources.schema.part.0'='{"type":"struct","fields":[{"name":"_hoodie_commit_time","type":"string","nullable":true,"metadata":{}},{"name":"_hoodie_commit_seqno","type":"string","nullable":true,"metadata":{}},{"name":"_hoodie_record_key","type":"string","nullable":true,"metadata":{}},{"name":"_hoodie_partition_path","type":"string","nullable":true,"metadata":{}},{"name":"_hoodie_file_name","type":"string","nullable":true,"metadata":{}},{"name":"user_id","type":"integer","nullable":true,"metadata":{}},{"name":"item_id","type":"long","nullable":true,"metadata":{}},{"name":"category_id","type":"integer","nullable":true,"metadata":{}},{"name":"behavior","type":"string","nullable":true,"metadata":{}},{"name":"ts","type":"long","nullable":true,"metadata":{}},{"name":"dt","type":"string","nullable":true,"metadata":{}},{"name":"hh","type":"string","nullable":true,"metadata":{}},{"name":"mm","type":"string","nullable":true,"metadata":{}}]}',  |
+|   'spark.sql.sources.schema.partCol.0'='dt',       |
+|   'spark.sql.sources.schema.partCol.1'='hh',       |
+|   'spark.sql.sources.schema.partCol.2'='mm',       |
+|   'transient_lastDdlTime'='1655378333')            |
++----------------------------------------------------+
+
+
+
+
+
+alter table user_behavior_hms_cow_tbl add if not exists partition(`dt`='20220615',`hh`='20',`mm`='17') location 'hdfs://hadoop102:8020/user/warehouse/user_behavior_hms_cow_tbl/20220615/20/17';
+
 
 
 
