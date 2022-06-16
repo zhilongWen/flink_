@@ -1,7 +1,7 @@
 /*
 
 
-    flink 同步 hive 无分区数据 https://blog.csdn.net/m0_37592814/article/details/108296458
+    flink 同步 hive 无分区数据 https://blog.csdn.net/m0_37592814/article/details/108296458 https://blog.csdn.net/m0_37592814/article/details/117909616
 
 	//https://blog.csdn.net/dudu146863/article/details/120151688
 	//https://blog.csdn.net/weixin_44131414/article/details/122983339
