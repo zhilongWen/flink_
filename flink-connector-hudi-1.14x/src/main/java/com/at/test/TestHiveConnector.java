@@ -35,11 +35,11 @@ public class TestHiveConnector {
         tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
         tableEnv.useDatabase("default");
 
-        tableEnv.executeSql("use gmall");
 
         tableEnv.executeSql("show tables").print();
 
-        tableEnv.executeSql("select * from ods_user_info").print();
+        tableEnv.executeSql("select * from user_behavior_hms_mor_tbl_rt").print();
+
 
 
 
