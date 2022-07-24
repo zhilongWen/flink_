@@ -1,4 +1,4 @@
-package com.at.hudi;
+package com.at.conntctors.hudi;
 
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;

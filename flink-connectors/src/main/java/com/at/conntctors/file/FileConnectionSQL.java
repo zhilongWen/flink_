@@ -1,12 +1,9 @@
-package com.at.file;
+package com.at.conntctors.file;
 
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-
-import java.util.concurrent.ExecutionException;
 
 /**
  * @create 2022-06-02

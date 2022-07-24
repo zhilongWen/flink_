@@ -1,4 +1,4 @@
-package com.at.cdc;
+package com.at.conntctors.cdc;
 
 import com.at.util.EnvironmentUtil;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;

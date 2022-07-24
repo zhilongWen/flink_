@@ -1,10 +1,8 @@
-package com.at.jdbc;
+package com.at.conntctors.jdbc;
 
 import com.at.pojo.UserBehavior;
-import com.mysql.cj.jdbc.MysqlXADataSource;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
-import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.jdbc.*;
 import org.apache.flink.shaded.guava30.com.google.common.hash.BloomFilter;
@@ -12,9 +10,7 @@ import org.apache.flink.shaded.guava30.com.google.common.hash.Funnels;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
-import org.apache.flink.util.function.SerializableSupplier;
 
-import javax.sql.XADataSource;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashSet;

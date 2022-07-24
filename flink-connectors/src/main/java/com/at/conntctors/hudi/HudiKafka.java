@@ -1,4 +1,4 @@
-package com.at.hudi;
+package com.at.conntctors.hudi;
 
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;

@@ -1,4 +1,4 @@
-package com.at.hive;
+package com.at.conntctors.hive;
 
 import com.at.util.EnvironmentUtil;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;

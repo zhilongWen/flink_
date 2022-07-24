@@ -1,4 +1,4 @@
-package com.at.hive;
+package com.at.conntctors.hive;
 
 import com.at.util.EnvironmentUtil;
 import org.apache.flink.api.java.tuple.Tuple5;
@@ -284,7 +284,7 @@ public class HiveConnector {
 	at org.apache.flink.table.planner.delegation.hive.HiveParser.processCmd(HiveParser.java:238)
 	at org.apache.flink.table.planner.delegation.hive.HiveParser.parse(HiveParser.java:208)
 	at org.apache.flink.table.api.internal.TableEnvironmentImpl.executeSql(TableEnvironmentImpl.java:695)
-	at com.at.hive.HiveConnector.main(HiveConnector.java:288)
+	at com.at.conntctors.hive.HiveConnector.main(HiveConnector.java:288)
 
 Exception in thread "main" org.apache.flink.table.api.ValidationException: HiveParser failed to parse insert into rule_tbl
 select user_id,
@@ -298,7 +298,7 @@ select user_id,
 	at org.apache.flink.table.planner.delegation.hive.HiveParser.processCmd(HiveParser.java:253)
 	at org.apache.flink.table.planner.delegation.hive.HiveParser.parse(HiveParser.java:208)
 	at org.apache.flink.table.api.internal.TableEnvironmentImpl.executeSql(TableEnvironmentImpl.java:695)
-	at com.at.hive.HiveConnector.main(HiveConnector.java:288)
+	at com.at.conntctors.hive.HiveConnector.main(HiveConnector.java:288)
 Caused by: org.apache.hadoop.hive.ql.parse.SemanticException: Line 9:6 Table not found 'source_tbl'
 	at org.apache.flink.table.planner.delegation.hive.copy.HiveParserSemanticAnalyzer.getMetaData(HiveParserSemanticAnalyzer.java:1547)
 	at org.apache.flink.table.planner.delegation.hive.copy.HiveParserSemanticAnalyzer.getMetaData(HiveParserSemanticAnalyzer.java:1487)

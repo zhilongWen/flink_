@@ -1,4 +1,4 @@
-package com.at.hive;
+package com.at.conntctors.hive;
 
 import com.at.constant.PropertiesConstants;
 import com.at.util.EnvironmentUtil;

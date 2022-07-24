@@ -1,11 +1,10 @@
-package com.at.kafka;
+package com.at.conntctors.kafka;
 
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.stream.Stream;
 
 /**
  * @create 2022-06-01

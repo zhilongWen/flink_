@@ -1,39 +1,27 @@
-package com.at.cdc;
+package com.at.conntctors.cdc;
 
-import com.alibaba.fastjson2.JSON;
 import com.at.pojo.Order;
 import com.at.util.EnvironmentUtil;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.shaded.com.fasterxml.jackson.databind.JsonNode;
-import com.ververica.cdc.connectors.shaded.com.fasterxml.jackson.databind.node.ArrayNode;
 import com.ververica.cdc.connectors.shaded.com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.ververica.cdc.connectors.shaded.com.fasterxml.jackson.databind.node.ObjectNode;
-import com.ververica.cdc.connectors.shaded.org.apache.kafka.connect.data.ConnectSchema;
 import com.ververica.cdc.connectors.shaded.org.apache.kafka.connect.data.Field;
 import com.ververica.cdc.connectors.shaded.org.apache.kafka.connect.data.Schema;
 import com.ververica.cdc.connectors.shaded.org.apache.kafka.connect.data.Struct;
 import com.ververica.cdc.connectors.shaded.org.apache.kafka.connect.errors.DataException;
-import com.ververica.cdc.connectors.shaded.org.apache.kafka.connect.header.Headers;
-import com.ververica.cdc.connectors.shaded.org.apache.kafka.connect.json.JsonConverter;
 import com.ververica.cdc.connectors.shaded.org.apache.kafka.connect.json.JsonSerializer;
 import com.ververica.cdc.connectors.shaded.org.apache.kafka.connect.source.SourceRecord;
 import com.ververica.cdc.debezium.DebeziumDeserializationSchema;
 
 import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
-import org.apache.calcite.linq4j.Ord;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
-import org.elasticsearch.index.engine.SafeCommitInfo;
 
 import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 /**
  * @create 2022-06-08
