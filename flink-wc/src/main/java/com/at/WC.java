@@ -12,6 +12,7 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.operators.StreamFlatMap;
 import org.apache.flink.util.Collector;
 
 import java.util.Arrays;
@@ -28,7 +29,7 @@ public class WC {
 
         env.setParallelism(1);
 
-        DataStreamSource<String> streamSource = env.socketTextStream("hadoop102", 8099);
+        DataStreamSource<String> streamSource = env.socketTextStream("localhost", 8099);
 
 //        SingleOutputStreamOperator<Tuple2<String, Integer>> streamOperator = streamSource.flatMap(new FlatMapFunction<String, Tuple2<String, Integer>>() {
 //            @Override
@@ -39,7 +40,7 @@ public class WC {
 //            }
 //        });
 
-
+//        StreamFlatMap
         SingleOutputStreamOperator<Tuple2<String, Integer>> streamOperator = streamSource.flatMap(new RichFlatMapFunction<String, Tuple2<String, Integer>>() {
 
             private transient Counter inCounter;

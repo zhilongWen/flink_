@@ -14,7 +14,7 @@
         <module>flink-case</module>
         <module>flink-libraries</module>
         <module>flink-wc</module>
-        <module>flink-connections</module>
+        <module>flink-connectors</module>
         <module>stream_framework</module>
         <module>flink-connector-hudi-1.14x</module>
     </modules>
