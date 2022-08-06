@@ -10,7 +10,6 @@ import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
 
 import java.util.Locale;
 import java.util.Random;
@@ -42,7 +41,7 @@ public class KafkaProducerTest {
 
                                     ctx.collect(
                                             WriteHiveTestBean.of(
-                                                    random.nextLong(),
+                                                    random.nextLong() & Long.MAX_VALUE ,
                                                     System.currentTimeMillis(),
                                                     UUID.randomUUID().toString().substring(1, 5),
                                                     UUID.randomUUID().toString().substring(2, 7).toUpperCase(Locale.ROOT))
@@ -76,7 +75,8 @@ public class KafkaProducerTest {
                 .build();
 
         sourceStream
-                .sinkTo(kafkaSink);
+                .print();
+//                .sinkTo(kafkaSink);
 
 
         env.execute();
