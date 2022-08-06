@@ -1,5 +1,8 @@
 package com.at;
 
+import org.apache.flink.runtime.state.filesystem.FsStateBackend;
+import org.apache.flink.streaming.api.CheckpointingMode;
+import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.SqlDialect;
@@ -16,6 +19,16 @@ public class FlinkHiveConnectorWriteTest {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         env.setParallelism(4);
+
+        env.setStateBackend(new FsStateBackend("file:///D:\\workspace\\flink_\\files\\ck"));
+        env.getCheckpointConfig().setCheckpointInterval(1 * 60 * 1000L);
+        env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(500);
+        env.getCheckpointConfig().setTolerableCheckpointFailureNumber(10);
+        env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
+        env.getCheckpointConfig().setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        env.getCheckpointConfig().enableUnalignedCheckpoints(true);
+
 
         EnvironmentSettings settings = EnvironmentSettings.inStreamingMode();
         TableEnvironment tableEnv = TableEnvironment.create(settings);
@@ -56,7 +69,14 @@ public class FlinkHiveConnectorWriteTest {
 
         tableEnv.executeSql(sourceSQL);
 
-        tableEnv.executeSql("select * from kafka_source_tbl").print();
+        tableEnv.executeSql("select\n"
+                + "    id,\n"
+                + "    name,\n"
+                + "    address,\n"
+                + "    ts,\n"
+                + "    date_format(row_time,'yyyyMMdd'),\n"
+                + "    date_format(row_time,'HH')\n"
+                + "from kafka_source_tbl").print();
 
 
 
