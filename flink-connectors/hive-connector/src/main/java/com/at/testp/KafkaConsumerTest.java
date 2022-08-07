@@ -1,25 +1,17 @@
-package com.at.test;
+package com.at.testp;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.at.WriteHiveTestBean;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
-import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
 import java.util.Arrays;
-import java.util.Locale;
-import java.util.Random;
-import java.util.UUID;
 
 /**
- * @create 2022-08-05
+ * @create 2022-08-07
  */
 public class KafkaConsumerTest {
 
@@ -49,5 +41,6 @@ public class KafkaConsumerTest {
 
 
     }
+
 
 }

@@ -1,4 +1,4 @@
-package com.at.test;
+package com.at.testp;
 
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;

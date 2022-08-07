@@ -1,4 +1,4 @@
-package com.at.test;
+package com.at.testp;
 
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
@@ -7,7 +7,7 @@ import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
 
 /**
- * @create 2022-08-05
+ * @create 2022-08-07
  */
 public class HiveReadTest {
 
@@ -35,11 +35,6 @@ public class HiveReadTest {
 
 
         tableEnv.executeSql("select * from tt").print();
-
-
-
-
-
 
 
         env.execute();

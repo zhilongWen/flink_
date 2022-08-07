@@ -1,12 +1,12 @@
 package com.at;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**
- * @create 2022-08-05
+ * @create 2022-08-07
  */
 public class WriteHiveTestBean {
+
 
     private long id;
 
@@ -85,4 +85,5 @@ public class WriteHiveTestBean {
                 ", address='" + address + '\'' +
                 '}';
     }
+
 }

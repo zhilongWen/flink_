@@ -1,10 +1,8 @@
-package com.at.test;
+package com.at.testp;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.at.WriteHiveTestBean;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -17,7 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @create 2022-08-05
+ * @create 2022-08-07
  */
 public class KafkaProducerTest {
 
@@ -75,8 +73,8 @@ public class KafkaProducerTest {
                 .build();
 
         sourceStream
-                .print();
-//                .sinkTo(kafkaSink);
+//                .print();
+                .sinkTo(kafkaSink);
 
 
         env.execute();
