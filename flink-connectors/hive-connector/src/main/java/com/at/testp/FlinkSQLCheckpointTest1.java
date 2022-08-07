@@ -93,8 +93,10 @@ public class FlinkSQLCheckpointTest1 {
                 + "from kafka_source_tbl\n";
 
         tableEnv.executeSql(sourceSQL);
-        tableEnv.executeSql(sinkSQL);
-        tableEnv.executeSql(insertSQL);
+        tableEnv.executeSql("select * from kafka_source_tbl").print();
+
+//        tableEnv.executeSql(sinkSQL);
+//        tableEnv.executeSql(insertSQL);
 
 //        env.execute();
 

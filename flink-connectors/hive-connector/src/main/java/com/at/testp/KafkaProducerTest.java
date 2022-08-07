@@ -39,13 +39,14 @@ public class KafkaProducerTest {
 
                                     ctx.collect(
                                             WriteHiveTestBean.of(
-                                                    random.nextLong() & Long.MAX_VALUE ,
+//                                                    random.nextLong() & Long.MAX_VALUE ,
+                                                    random.nextInt() & Integer.MAX_VALUE,
                                                     System.currentTimeMillis(),
                                                     UUID.randomUUID().toString().substring(1, 5),
                                                     UUID.randomUUID().toString().substring(2, 7).toUpperCase(Locale.ROOT))
                                     );
 
-                                    try { TimeUnit.SECONDS.sleep(20); } catch (InterruptedException e) { e.printStackTrace(); }
+                                    try { TimeUnit.SECONDS.sleep(5); } catch (InterruptedException e) { e.printStackTrace(); }
 
                                 }
 
