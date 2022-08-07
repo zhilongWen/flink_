@@ -45,7 +45,7 @@ public class KafkaProducerTest {
                                                     UUID.randomUUID().toString().substring(2, 7).toUpperCase(Locale.ROOT))
                                     );
 
-                                    try { TimeUnit.SECONDS.sleep(3); } catch (InterruptedException e) { e.printStackTrace(); }
+                                    try { TimeUnit.SECONDS.sleep(20); } catch (InterruptedException e) { e.printStackTrace(); }
 
                                 }
 
@@ -66,7 +66,7 @@ public class KafkaProducerTest {
                 .setRecordSerializer(
                         KafkaRecordSerializationSchema
                                 .builder()
-                                .setTopic("hive-logs")
+                                .setTopic("hive-test-logs")
                                 .setValueSerializationSchema(new SimpleStringSchema())
                                 .build()
                 )
