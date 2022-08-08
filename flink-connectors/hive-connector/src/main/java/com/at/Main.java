@@ -44,7 +44,9 @@ public class Main {
 //        this.watermarkTimeZone = ZoneId.of(conf.getString(FileSystemConnectorOptions.SINK_PARTITION_COMMIT_WATERMARK_TIME_ZONE));
 
 
-        Object newInstance = ClassLoader.getSystemClassLoader().loadClass("com.at.ConsumerPartitionTimeExtractor").newInstance();
+//        Object newInstance = ClassLoader.getSystemClassLoader().loadClass("com.at.ConsumerPartitionTimeExtractor").newInstance();
+        Object newInstance = ClassLoader.getSystemClassLoader().loadClass("com.at.writehive.FlinkWriteHiveConsumerPartitionTimeExtractor$ConsumerPartitionTimeExtractor").newInstance();
+//        Object newInstance = ClassLoader.getSystemClassLoader().loadClass("com.at.writehive.ConsumerPartitionTimeExtractor").newInstance();
 
         System.out.println(newInstance);
 
