@@ -50,6 +50,9 @@ public class Main {
 
         System.out.println(newInstance);
 
+
+        System.out.println(System.currentTimeMillis() - 2 * 24 * 3600 * 1000);
+
     }
 
 }

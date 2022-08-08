@@ -41,7 +41,7 @@ public class KafkaProducerTest {
                                             WriteHiveTestBean.of(
 //                                                    random.nextLong() & Long.MAX_VALUE ,
                                                     random.nextInt() & Integer.MAX_VALUE,
-                                                    System.currentTimeMillis(),
+                                                    System.currentTimeMillis()-24*3600*1000,
                                                     UUID.randomUUID().toString().substring(1, 5),
                                                     UUID.randomUUID().toString().substring(2, 7).toUpperCase(Locale.ROOT))
                                     );
