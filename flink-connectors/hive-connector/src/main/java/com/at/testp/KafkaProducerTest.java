@@ -63,8 +63,8 @@ public class KafkaProducerTest {
 
         KafkaSink<String> kafkaSink = KafkaSink
                 .<String>builder()
-//                .setBootstrapServers("hadoop102:9092,hadoop103:9092,hadoop104:9092")
-                .setBootstrapServers("hdfs01:9092,hdfs02:9092,hdfs03:9092")
+                .setBootstrapServers("hadoop102:9092,hadoop103:9092,hadoop104:9092")
+//                .setBootstrapServers("hdfs01:9092,hdfs02:9092,hdfs03:9092")
                 .setRecordSerializer(
                         KafkaRecordSerializationSchema
                                 .builder()
