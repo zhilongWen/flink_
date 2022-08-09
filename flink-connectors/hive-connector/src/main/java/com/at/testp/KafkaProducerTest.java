@@ -41,12 +41,12 @@ public class KafkaProducerTest {
                                             WriteHiveTestBean.of(
 //                                                    random.nextLong() & Long.MAX_VALUE ,
                                                     random.nextInt() & Integer.MAX_VALUE,
-                                                    System.currentTimeMillis() /*- 1 * 24*3600*1000 + 20 * 6790*1000*/,
+                                                    System.currentTimeMillis(),
                                                     UUID.randomUUID().toString().substring(1, 5),
                                                     UUID.randomUUID().toString().substring(2, 7).toUpperCase(Locale.ROOT))
                                     );
 
-                                    try { TimeUnit.MILLISECONDS.sleep(5 * 1000); } catch (InterruptedException e) { e.printStackTrace(); }
+                                    try { TimeUnit.MILLISECONDS.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
 
                                 }
 
@@ -69,6 +69,7 @@ public class KafkaProducerTest {
                         KafkaRecordSerializationSchema
                                 .builder()
                                 .setTopic("hive-test-logs")
+//                                .setTopic("hive-test-logs_3")
                                 .setValueSerializationSchema(new SimpleStringSchema())
                                 .build()
                 )

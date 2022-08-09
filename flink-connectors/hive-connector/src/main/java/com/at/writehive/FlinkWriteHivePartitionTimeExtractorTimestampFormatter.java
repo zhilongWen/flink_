@@ -25,7 +25,9 @@ public class FlinkWriteHivePartitionTimeExtractorTimestampFormatter {
         EnvironmentSettings settings = EnvironmentSettings.inStreamingMode();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 
-        env.setParallelism(1);
+        env.setParallelism(4);
+
+
         env.setRestartStrategy(RestartStrategies.failureRateRestart(3,
                 // 任务失败的时间启动的间隔
                 Time.of(5, TimeUnit.SECONDS),
@@ -72,6 +74,7 @@ public class FlinkWriteHivePartitionTimeExtractorTimestampFormatter {
                 + ")with(\n"
                 + "    'connector' = 'kafka',\n"
                 + "    'topic' = 'hive-test-logs',\n"
+//                + "    'topic' = 'hive-test-logs_3',\n"
                 + "    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',\n"
                 + "    'properties.group.id' = 'hive-logs-group-id',\n"
                 + "    'scan.startup.mode' = 'earliest-offset',\n"
@@ -113,6 +116,8 @@ public class FlinkWriteHivePartitionTimeExtractorTimestampFormatter {
 
 
         tableEnv.executeSql(sourceSQL);
+
+//        tableEnv.executeSql("select * from kafka_source_tbl").print();
 
         tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
 
