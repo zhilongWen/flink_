@@ -11,12 +11,21 @@ import org.apache.flink.table.api.SqlDialect;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class FlinkWriteHive {
 
     public static void main(String[] args) {
 
+
+        if(args == null || args.length <1){
+            System.exit(1);
+        }
+
+        String checkpointDir = args[0];
+
+        System.setProperty("HADOOP_USER_NAME", "hdfs");
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
@@ -32,8 +41,8 @@ public class FlinkWriteHive {
         );
 
 
-
-        env.setStateBackend(new FsStateBackend("file:///D:\\workspace\\flink_\\files\\ck"));
+        // "file:///D:\\workspace\\flink_\\files\\ck"  file:///D:\\workspace\\me\\flink_\\files\\ck
+        env.setStateBackend(new FsStateBackend(checkpointDir));
         env.getCheckpointConfig().setCheckpointInterval(1 * 60 * 1000L);
         env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         env.getCheckpointConfig().setMinPauseBetweenCheckpoints(60 * 1000L);
@@ -49,7 +58,7 @@ public class FlinkWriteHive {
         String hiveConfDir = "./conf";
         String version = "3.1.2";
 
-        HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir);
+        HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir,version);
         tableEnv.registerCatalog("myhive", hive);
 
         // set the HiveCatalog as the current catalog of the session
@@ -70,9 +79,12 @@ public class FlinkWriteHive {
                 + ")with(\n"
                 + "    'connector' = 'kafka',\n"
                 + "    'topic' = 'hive-test-logs',\n"
-                + "    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',\n"
+//                + "    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',\n"
+                + "    'properties.bootstrap.servers' = 'hdfs01:9092,hdfs02:9092,hdfs03:9092',\n"
                 + "    'properties.group.id' = 'hive-logs-group-id',\n"
-                + "    'scan.startup.mode' = 'earliest-offset',\n"
+                + "    'scan.startup.mode' = 'timestamp',\n"
+                + "    'scan.startup.timestamp-millis' = '1660007400000',\n"
+//                + "    'scan.startup.mode' = 'earliest-offset',\n"
 //                + "    -- 'scan.startup.mode' = 'latest-offset',\n"
                 + "    'format' = 'json',\n"
                 + "    'json.ignore-parse-errors' = 'true'\n"
@@ -130,7 +142,26 @@ public class FlinkWriteHive {
 
         tableEnv.executeSql(insertSQL);
 
+/*
 
+
+Caused by: java.io.IOException: Failed to deserialize consumer record ConsumerRecord(topic = hive-test-logs, partition = 2, leaderEpoch = 0, offset = 0, CreateTime = 1660011566355, serialized key size = -1, serialized value size = 68, headers = RecordHeaders(headers = [], isReadOnly = false), key = null, value = [B@e22eeca).
+	at org.apache.flink.connector.kafka.source.reader.deserializer.KafkaDeserializationSchemaWrapper.deserialize(KafkaDeserializationSchemaWrapper.java:57)
+	at org.apache.flink.connector.kafka.source.reader.KafkaRecordEmitter.emitRecord(KafkaRecordEmitter.java:53)
+	... 14 more
+
+Caused by: org.apache.flink.streaming.runtime.tasks.ExceptionInChainedOperatorException: Could not forward element to next operator
+	at org.apache.flink.streaming.runtime.tasks.CopyingChainingOutput.pushToOperator(CopyingChainingOutput.java:99)
+	at org.apache.flink.streaming.runtime.tasks.CopyingChainingOutput.collect(CopyingChainingOutput.java:57)
+	at org.apache.flink.streaming.runtime.tasks.CopyingChainingOutput.collect(CopyingChainingOutput.java:29)
+	at org.apache.flink.streaming.api.operators.CountingOutput.collect(CountingOutput.java:56)
+	at org.apache.flink.streaming.api.operators.CountingOutput.collect(CountingOutput.java:29)
+	at StreamExecCalc$56.processElement_split2(Unknown Source)
+	at StreamExecCalc$56.processElement(Unknown Source)
+	at org.apache.flink.streaming.runtime.tasks.CopyingChainingOutput.pushToOperator(CopyingChainingOutput.java:82)
+	... 23 more
+
+ */
 
     }
 }

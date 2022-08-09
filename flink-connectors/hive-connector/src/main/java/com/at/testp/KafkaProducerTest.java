@@ -41,12 +41,12 @@ public class KafkaProducerTest {
                                             WriteHiveTestBean.of(
 //                                                    random.nextLong() & Long.MAX_VALUE ,
                                                     random.nextInt() & Integer.MAX_VALUE,
-                                                    System.currentTimeMillis()-24*3600*1000,
+                                                    System.currentTimeMillis()-24*3600*1000 + 11*3600*1000,
                                                     UUID.randomUUID().toString().substring(1, 5),
                                                     UUID.randomUUID().toString().substring(2, 7).toUpperCase(Locale.ROOT))
                                     );
 
-                                    try { TimeUnit.SECONDS.sleep(5); } catch (InterruptedException e) { e.printStackTrace(); }
+//                                    try { TimeUnit.SECONDS.sleep(5); } catch (InterruptedException e) { e.printStackTrace(); }
 
                                 }
 
@@ -63,8 +63,8 @@ public class KafkaProducerTest {
 
         KafkaSink<String> kafkaSink = KafkaSink
                 .<String>builder()
-                .setBootstrapServers("hadoop102:9092,hadoop103:9092,hadoop104:9092")
-//                .setBootstrapServers("hdfs01:9092,hdfs02:9092,hdfs03:9092")
+//                .setBootstrapServers("hadoop102:9092,hadoop103:9092,hadoop104:9092")
+                .setBootstrapServers("hdfs01:9092,hdfs02:9092,hdfs03:9092")
                 .setRecordSerializer(
                         KafkaRecordSerializationSchema
                                 .builder()

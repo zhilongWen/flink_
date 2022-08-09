@@ -3,6 +3,7 @@ package com.at;
 import org.apache.flink.connector.file.table.FileSystemConnectorOptions;
 import org.apache.flink.connector.file.table.PartitionTimeExtractor;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -52,6 +53,9 @@ public class Main {
 
 
         System.out.println(System.currentTimeMillis() - 2 * 24 * 3600 * 1000);
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        System.out.println(simpleDateFormat.parse("2022-08-09 09:10:00").getTime());
 
     }
 
