@@ -81,7 +81,7 @@ public class FlinkSQLWriteHive {
                 + "    'json.ignore-parse-errors' = 'true'\n"
                 + ")";
 
-        String hiveSinkSQL = "create table if not exists hive_stream_create_flink_tbl(\n"
+        String hiveSinkSQL = "create table if not exists hive_stream_create_flink_tbl_1(\n"
                 + "    id bigint,\n"
                 + "    name string,\n"
                 + "    address string,\n"
@@ -89,7 +89,7 @@ public class FlinkSQLWriteHive {
                 + ")COMMENT 'flink create table test'\n"
                 + "    PARTITIONED BY (`dt` STRING,`hm` STRING,`mm` STRING)\n"
                 + "    STORED AS ORC\n"
-                + "    LOCATION '/warehouse/test/hive_stream_create_flink_tbl'\n"
+                + "    LOCATION '/warehouse/test/hive_stream_create_flink_tbl_1'\n"
                 + "    TBLPROPERTIES (\n"
                 + "        'orc.compress' = 'snappy',\n"
                 + "        'partition.time-extractor.timestamp-pattern'='$dt $hm:$mm:00',\n"
@@ -100,7 +100,7 @@ public class FlinkSQLWriteHive {
                 + "    )\n";
 
 
-        String insertSQL = "insert into hive_stream_create_flink_tbl\n"
+        String insertSQL = "insert into hive_stream_create_flink_tbl_1\n"
                 + "select\n"
                 + "    id,\n"
                 + "    name,\n"

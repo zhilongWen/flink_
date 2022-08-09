@@ -25,7 +25,7 @@ public class FlinkWriteHive {
 
         String checkpointDir = args[0];
 
-        System.setProperty("HADOOP_USER_NAME", "hdfs");
+        System.setProperty("HADOOP_USER_NAME", "zero");
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
@@ -79,12 +79,12 @@ public class FlinkWriteHive {
                 + ")with(\n"
                 + "    'connector' = 'kafka',\n"
                 + "    'topic' = 'hive-test-logs',\n"
-//                + "    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',\n"
-                + "    'properties.bootstrap.servers' = 'hdfs01:9092,hdfs02:9092,hdfs03:9092',\n"
+                + "    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',\n"
+//                + "    'properties.bootstrap.servers' = 'hdfs01:9092,hdfs02:9092,hdfs03:9092',\n"
                 + "    'properties.group.id' = 'hive-logs-group-id',\n"
-                + "    'scan.startup.mode' = 'timestamp',\n"
-                + "    'scan.startup.timestamp-millis' = '1660007400000',\n"
-//                + "    'scan.startup.mode' = 'earliest-offset',\n"
+//                + "    'scan.startup.mode' = 'timestamp',\n"
+//                + "    'scan.startup.timestamp-millis' = '1660007400000',\n"
+                + "    'scan.startup.mode' = 'earliest-offset',\n"
 //                + "    -- 'scan.startup.mode' = 'latest-offset',\n"
                 + "    'format' = 'json',\n"
                 + "    'json.ignore-parse-errors' = 'true'\n"
