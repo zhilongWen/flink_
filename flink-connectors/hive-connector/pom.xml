@@ -153,6 +153,15 @@ under the License.
 			<version>${flink.version}</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.apache.flink/flink-runtime-web -->
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-runtime-web</artifactId>
+			<version>${flink.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+
 		<!-- hive connector -->
 		<dependency>
 			<groupId>org.apache.flink</groupId>

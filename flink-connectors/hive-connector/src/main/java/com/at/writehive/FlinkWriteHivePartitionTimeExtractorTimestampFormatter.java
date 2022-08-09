@@ -91,7 +91,7 @@ public class FlinkWriteHivePartitionTimeExtractorTimestampFormatter {
                 + "    LOCATION '/warehouse/test/hive_stream_create_flink_timestamp_formatter_tbl'\n"
                 + "    TBLPROPERTIES (\n"
                 + "        'orc.compress' = 'snappy',\n"
-                + "        'partition.time-extractor.timestamp-pattern'='$dt $hr:$mm:00',\n"
+                + "        'partition.time-extractor.timestamp-pattern'='$dt $hm:$mm:00',\n"
                 + "        'partition.time-extractor.timestamp-formatter'='yyyyMMdd HH:mm:ss',\n"
                 + "        'sink.partition-commit.trigger'='partition-time',\n"
                 + "        'sink.partition-commit.delay'='1 min',\n"
@@ -106,22 +106,11 @@ public class FlinkWriteHivePartitionTimeExtractorTimestampFormatter {
                 + "    name,\n"
                 + "    address,\n"
                 + "    ts,\n"
-                + "    date_format(row_time,'yyyy-MM-dd'),\n" // 适用默认的 partition.time-extractor.timestamp-pattern 格式为 yyyy-MM-dd HH:mm:ss
+                + "    date_format(row_time,'yyyyMMdd'),\n" // 适用默认的 partition.time-extractor.timestamp-pattern 格式为 yyyy-MM-dd HH:mm:ss
                 + "    date_format(row_time,'HH'),\n"
                 + "    date_format(row_time,'mm')\n"
                 + "from kafka_source_tbl";
 
-//        tableEnv.executeSql(sourceSQL);
-//
-//        tableEnv.executeSql("select\n"
-//                + "    id,\n"
-//                + "    name,\n"
-//                + "    address,\n"
-//                + "    ts,\n"
-//                + "    date_format(row_time,'yyyyMMdd'),\n"
-//                + "    date_format(row_time,'HH'),\n"
-//                + "    date_format(row_time,'mm')\n"
-//                + "from kafka_source_tbl").print();
 
         tableEnv.executeSql(sourceSQL);
 
