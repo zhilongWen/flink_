@@ -41,6 +41,8 @@ under the License.
 
 		<hadoop.version>3.1.3</hadoop.version>
 
+		<consumer.lib>${basedir}/lib</consumer.lib>
+
 
 	</properties>
 
@@ -157,8 +159,9 @@ under the License.
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-runtime-web</artifactId>
-			<version>${flink.version}</version>
-			<scope>test</scope>
+			<version>1.15.0</version>
+			<systemPath>${consumer.lib}/flink-runtime-web-1.15.0.jar</systemPath>
+			<scope>system</scope>
 		</dependency>
 
 

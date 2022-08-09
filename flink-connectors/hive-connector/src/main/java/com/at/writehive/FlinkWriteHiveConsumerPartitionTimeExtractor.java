@@ -2,6 +2,7 @@ package com.at.writehive;
 
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.time.Time;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.file.table.PartitionTimeExtractor;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.CheckpointingMode;
@@ -13,6 +14,7 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
 
 import javax.annotation.Nullable;
+import javax.management.relation.RelationNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -29,10 +31,14 @@ import java.util.concurrent.TimeUnit;
 public class FlinkWriteHiveConsumerPartitionTimeExtractor {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
 
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+//        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+        Configuration conf = new Configuration();
+        conf.setString("rest.port","8081");
+        StreamExecutionEnvironment env  = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
 
         EnvironmentSettings settings = EnvironmentSettings.inStreamingMode();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
@@ -124,17 +130,6 @@ public class FlinkWriteHiveConsumerPartitionTimeExtractor {
                 + "    date_format(row_time,'mm')\n"
                 + "from kafka_source_tbl";
 
-//        tableEnv.executeSql(sourceSQL);
-//
-//        tableEnv.executeSql("select\n"
-//                + "    id,\n"
-//                + "    name,\n"
-//                + "    address,\n"
-//                + "    ts,\n"
-//                + "    date_format(row_time,'yyyyMMdd'),\n"
-//                + "    date_format(row_time,'HH'),\n"
-//                + "    date_format(row_time,'mm')\n"
-//                + "from kafka_source_tbl").print();
 
         tableEnv.executeSql(sourceSQL);
 
@@ -146,6 +141,8 @@ public class FlinkWriteHiveConsumerPartitionTimeExtractor {
 
         tableEnv.executeSql(insertSQL);
 
+
+        env.execute();
 
 
     }
