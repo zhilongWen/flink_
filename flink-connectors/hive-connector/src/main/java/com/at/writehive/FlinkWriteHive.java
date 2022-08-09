@@ -90,7 +90,7 @@ public class FlinkWriteHive {
                 + "    'json.ignore-parse-errors' = 'true'\n"
                 + ")";
 
-        String hiveSinkSQL = "create table if not exists hive_stream_create_flink_tbl(\n"
+        String hiveSinkSQL = "create table if not exists hive_stream_create_flink_tbl_2(\n"
                 + "       id bigint,\n"
                 + "       name string,\n"
                 + "       address string,\n"
@@ -98,10 +98,10 @@ public class FlinkWriteHive {
                 + ")COMMENT 'flink create table test'\n"
                 + "    PARTITIONED BY (`dt` STRING,`hm` STRING,`mm` STRING)\n"
                 + "    STORED AS ORC\n"
-                + "    LOCATION '/warehouse/test/hive_stream_create_flink_tbl'\n"
+                + "    LOCATION '/warehouse/test/hive_stream_create_flink_tbl_2'\n"
                 + "    TBLPROPERTIES (\n"
                 + "        'orc.compress' = 'snappy',\n"
-                + "        'partition.time-extractor.timestamp-pattern'='$dt $hr:$mm:00',\n"
+                + "        'partition.time-extractor.timestamp-pattern'='$dt $hm:$mm:00',\n"
                 + "        'sink.partition-commit.trigger'='partition-time',\n"
                 + "        'sink.partition-commit.delay'='1 min',\n"
                 + "        'sink.partition-commit.watermark-time-zone'='Asia/Shanghai',\n"
@@ -109,7 +109,7 @@ public class FlinkWriteHive {
                 + "    )";
 
 
-        String insertSQL = "insert into hive_stream_create_flink_tbl\n"
+        String insertSQL = "insert into hive_stream_create_flink_tbl_2\n"
                 + "select\n"
                 + "    id,\n"
                 + "    name,\n"
