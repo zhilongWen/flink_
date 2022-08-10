@@ -23,7 +23,7 @@ public class KafkaProducerTest {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        env.setParallelism(1);
+        env.setParallelism(4);
 
         SingleOutputStreamOperator<String> sourceStream = env
                 .addSource(
@@ -46,7 +46,7 @@ public class KafkaProducerTest {
                                                     UUID.randomUUID().toString().substring(2, 7).toUpperCase(Locale.ROOT))
                                     );
 
-                                    try { TimeUnit.MILLISECONDS.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
+                                    try { TimeUnit.MILLISECONDS.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
 
                                 }
 
@@ -68,7 +68,8 @@ public class KafkaProducerTest {
                 .setRecordSerializer(
                         KafkaRecordSerializationSchema
                                 .builder()
-                                .setTopic("hive-test-logs")
+//                                .setTopic("hive-test-logs")
+                                .setTopic("test-lop")
 //                                .setTopic("hive-test-logs_3")
                                 .setValueSerializationSchema(new SimpleStringSchema())
                                 .build()
