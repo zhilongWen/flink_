@@ -18,6 +18,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class FlinkWriteHivePartitionTimeExtractorTimestampFormatter {
 
+    //https://blog.csdn.net/gakki_200/article/details/106413351?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-106413351-blog-120781200.pc_relevant_aa&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-106413351-blog-120781200.pc_relevant_aa&utm_relevant_index=1
+
     public static void main(String[] args) {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -73,10 +75,9 @@ public class FlinkWriteHivePartitionTimeExtractorTimestampFormatter {
                 + "   watermark for row_time as row_time - interval '60' second\n"
                 + ")with(\n"
                 + "    'connector' = 'kafka',\n"
-//                + "    'topic' = 'hive-test-logs',\n"
-                + "    'topic' = 'test-lop',\n"
+                + "    'topic' = 'flink-write-hive-test-topic',\n"
                 + "    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',\n"
-                + "    'properties.group.id' = 'testLop-group-id',\n"
+                + "    'properties.group.id' = 'flink-write-hive-test-topic-groupId',\n"
                 + "    'scan.startup.mode' = 'earliest-offset',\n"
 //                + "    -- 'scan.startup.mode' = 'latest-offset',\n"
                 + "    'format' = 'json',\n"
@@ -99,7 +100,12 @@ public class FlinkWriteHivePartitionTimeExtractorTimestampFormatter {
                 + "        'sink.partition-commit.trigger'='partition-time',\n"
                 + "        'sink.partition-commit.delay'='1 min',\n"
                 + "        'sink.partition-commit.watermark-time-zone'='Asia/Shanghai',\n"
-                + "        'sink.partition-commit.policy.kind'='metastore,success-file'\n"
+                + "        'sink.partition-commit.policy.kind'='metastore,success-file',\n"
+                + "        'sink.rolling-policy.file-size'='1MB',\n"
+                + "        'sink.rolling-policy.rollover-interval'='1 min',\n"
+//                + "        'auto-compaction'='yes',\n"
+                + "        'compaction.file-size'='1MB',\n"
+                + "        'sink.rolling-policy.rollover-interval'='1 min'\n"
                 + "    )";
 
 

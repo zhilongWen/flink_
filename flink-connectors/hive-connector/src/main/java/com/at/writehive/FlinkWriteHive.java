@@ -78,7 +78,7 @@ public class FlinkWriteHive {
                 + "   watermark for row_time as row_time - interval '60' second\n"
                 + ")with(\n"
                 + "    'connector' = 'kafka',\n"
-                + "    'topic' = 'hive-test-logs',\n"
+                + "    'topic' = 'flink-write-hive-test-topic',\n"
                 + "    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',\n"
 //                + "    'properties.bootstrap.servers' = 'hdfs01:9092,hdfs02:9092,hdfs03:9092',\n"
                 + "    'properties.group.id' = 'hive-logs-group-id',\n"
