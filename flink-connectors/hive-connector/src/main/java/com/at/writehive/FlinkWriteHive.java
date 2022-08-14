@@ -41,32 +41,32 @@ public class FlinkWriteHive {
         );
 
 
-        // "file:///D:\\workspace\\flink_\\files\\ck"  file:///D:\\workspace\\me\\flink_\\files\\ck
-        env.setStateBackend(new FsStateBackend(checkpointDir));
-        env.getCheckpointConfig().setCheckpointInterval(1 * 60 * 1000L);
-        env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(60 * 1000L);
-        env.getCheckpointConfig().setCheckpointTimeout(60 * 1000L);
-        env.getCheckpointConfig().setTolerableCheckpointFailureNumber(10);
-        env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
-        env.getCheckpointConfig().setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        env.getCheckpointConfig().enableUnalignedCheckpoints(true);
-
-
-        String name = "myhive";
-        String defaultDatabase = "default";
-        String hiveConfDir = "./conf";
-        String version = "3.1.2";
-
-        HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir,version);
-        tableEnv.registerCatalog("myhive", hive);
-
-        // set the HiveCatalog as the current catalog of the session
-        tableEnv.useCatalog("myhive");
-        tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
-        tableEnv.useDatabase("testdb");
-
-        tableEnv.getConfig().setSqlDialect(SqlDialect.DEFAULT);
+//        // "file:///D:\\workspace\\flink_\\files\\ck"  file:///D:\\workspace\\me\\flink_\\files\\ck
+//        env.setStateBackend(new FsStateBackend(checkpointDir));
+//        env.getCheckpointConfig().setCheckpointInterval(1 * 60 * 1000L);
+//        env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+//        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(60 * 1000L);
+//        env.getCheckpointConfig().setCheckpointTimeout(60 * 1000L);
+//        env.getCheckpointConfig().setTolerableCheckpointFailureNumber(10);
+//        env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
+//        env.getCheckpointConfig().setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+//        env.getCheckpointConfig().enableUnalignedCheckpoints(true);
+//
+//
+//        String name = "myhive";
+//        String defaultDatabase = "default";
+//        String hiveConfDir = "./conf";
+//        String version = "3.1.2";
+//
+//        HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir,version);
+//        tableEnv.registerCatalog("myhive", hive);
+//
+//        // set the HiveCatalog as the current catalog of the session
+//        tableEnv.useCatalog("myhive");
+//        tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
+//        tableEnv.useDatabase("testdb");
+//
+//        tableEnv.getConfig().setSqlDialect(SqlDialect.DEFAULT);
 
 
         String sourceSQL = "create table if not exists kafka_source_tbl(\n"
@@ -120,27 +120,27 @@ public class FlinkWriteHive {
                 + "    date_format(row_time,'mm')\n"
                 + "from kafka_source_tbl";
 
-//        tableEnv.executeSql(sourceSQL);
-//
-//        tableEnv.executeSql("select\n"
-//                + "    id,\n"
-//                + "    name,\n"
-//                + "    address,\n"
-//                + "    ts,\n"
-//                + "    date_format(row_time,'yyyyMMdd'),\n"
-//                + "    date_format(row_time,'HH'),\n"
-//                + "    date_format(row_time,'mm')\n"
-//                + "from kafka_source_tbl").print();
-
         tableEnv.executeSql(sourceSQL);
 
-        tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
+        tableEnv.executeSql("select\n"
+                + "    id,\n"
+                + "    name,\n"
+                + "    address,\n"
+                + "    ts,\n"
+                + "    date_format(row_time,'yyyyMMdd'),\n"
+                + "    date_format(row_time,'HH'),\n"
+                + "    date_format(row_time,'mm')\n"
+                + "from kafka_source_tbl").print();
 
-        tableEnv.executeSql(hiveSinkSQL);
-
-        tableEnv.getConfig().setSqlDialect(SqlDialect.DEFAULT);
-
-        tableEnv.executeSql(insertSQL);
+//        tableEnv.executeSql(sourceSQL);
+//
+//        tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
+//
+//        tableEnv.executeSql(hiveSinkSQL);
+//
+//        tableEnv.getConfig().setSqlDialect(SqlDialect.DEFAULT);
+//
+//        tableEnv.executeSql(insertSQL);
 
 /*
 
