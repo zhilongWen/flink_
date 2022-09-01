@@ -27,6 +27,8 @@ public class ConsumerFunction {
 
 //        tableEnv.registerFunction("SPLIT", new SplitUdtf());
 
+
+        // 方式1
         tableEnv.registerFunction("SubstringFunction",new SubstringFunction());
 
 
@@ -48,6 +50,8 @@ public class ConsumerFunction {
 
         tableEnv.createTemporaryView("source_tbl",streamSource, schema);
 
+        // 方式2
+
 //        // call function "inline" without registration in Table API
 //        tableEnv.from("source_tbl").select(call(SubstringFunction.class, $("f0"), 0, 3));
 //
@@ -57,14 +61,29 @@ public class ConsumerFunction {
 //        // call registered function in Table API
 //        tableEnv.from("source_tbl").select(call("SubstringFunction", $("f0"), 0, 3));
 
+//        tableEnv.executeSql("select SubstringFunction(f0,0,2) from source_tbl").print();
 
-        tableEnv.executeSql("select SubstringFunction(f0,0,2) from source_tbl").print();
+
+// -----------------------------------------------------------------------
+
+
+//        tableEnv
+//                .from("source_tbl")
+//                .joinLateral(call(SplitUdtf.class,$("f1")))
+//                .select($("f1"));
+
+        // register function
+        tableEnv.createTemporarySystemFunction("SplitFunction", SplitUdtf.class);
+
+
+        tableEnv.executeSql("select f0,info from source_tbl,LATERAL TABLE(SplitFunction(f1)) AS T(info) ").print();
 
 
         env.execute();
 
 
     }
+
 
 
 }
