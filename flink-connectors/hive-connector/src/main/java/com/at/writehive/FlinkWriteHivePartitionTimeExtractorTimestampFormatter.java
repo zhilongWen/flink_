@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class FlinkWriteHivePartitionTimeExtractorTimestampFormatter {
 
-    //https://blog.csdn.net/gakki_200/article/details/106413351?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-106413351-blog-120781200.pc_relevant_aa&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-106413351-blog-120781200.pc_relevant_aa&utm_relevant_index=1
+    // https://blog.csdn.net/gakki_200/article/details/106413351?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-106413351-blog-120781200.pc_relevant_aa&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-106413351-blog-120781200.pc_relevant_aa&utm_relevant_index=1
 
     public static void main(String[] args) {
 
