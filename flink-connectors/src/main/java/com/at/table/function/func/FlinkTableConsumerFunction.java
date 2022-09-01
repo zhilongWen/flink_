@@ -78,10 +78,36 @@ public class FlinkTableConsumerFunction {
 
 */
 
+        // -------------------------------------------------------------------------------------
+        // 将数组展开为单列多行
+        // -------------------------------------------------------------------------------------
 
+        // unset
+//        tableEnv.executeSql("SELECT userId,eventTime,eventType,productId,productImage \n"
+//                + "FROM source_table, UNNEST(productImages) as t(productImage)").print();
 
+        // register function
+        tableEnv.createTemporarySystemFunction("ExpandArrayOneColumnMultRowUDTF", ExpandArrayOneColumnMultRowUDTF.class);
+        tableEnv.executeSql("SELECT \n"
+                + "        userId, \n"
+                + "        eventTime, \n"
+                + "        eventType, \n"
+                + "        productId, \n"
+                + "        productImage \n"
+                + "FROM source_table, \n"
+                + "        LATERAL TABLE (ExpandArrayOneColumnMultRowUDTF(`productImages`)) AS T(productImage)").print();
 
+/*
++-------------+--------------------------------+--------------------------------+-------------+--------------------------------+
+|      userId |                      eventTime |                      eventType |   productId |                   productImage |
++-------------+--------------------------------+--------------------------------+-------------+--------------------------------+
+|           2 |            2021-10-01 08:08:08 |                          click |           1 |                         image1 |
+|           2 |            2021-10-01 08:08:08 |                          click |           1 |                         image2 |
+|           2 |            2021-10-01 08:08:08 |                          click |           2 |                         image1 |
+|           2 |            2021-10-01 08:08:08 |                          click |           2 |                         image2 |
++-------------+--------------------------------+--------------------------------+-------------+--------------------------------+
 
+*/
 
 
 
