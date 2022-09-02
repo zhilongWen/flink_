@@ -27,10 +27,10 @@ import java.util.logging.Logger;
 /**
  * @create 2022-09-01
  */
-//@FunctionHint(
-//        input = @DataTypeHint("ARRAY<ROW<`content_type` STRING, `url` STRING>>"),
-//        output = @DataTypeHint("ROW<`content_type` STRING, `url` STRING> ")
-//)
+@FunctionHint(
+        input = @DataTypeHint("ARRAY<ROW<`content_type` STRING, `url` STRING>>"),
+        output = @DataTypeHint("ROW<`content_type` STRING, `url` STRING> ")
+)
 public class ParserJsonArray extends TableFunction<Row> {
 
 
@@ -53,19 +53,15 @@ public class ParserJsonArray extends TableFunction<Row> {
 //    }
 
 
-    public void eval(List<Row> value) {
+    public void eval(Row[] value) {
 
-//        List<Row> rows = Arrays
-//                .asList(
-//                        Row.of("1", "a"),
-//                        Row.of("2", "b")
-//                );
-
-        if( CollectionUtil.isNullOrEmpty(value)) return;
+        if(value == null || value.length < 1) return;
 
         try {
 
-            Iterator<Row> iterator = value.iterator();
+            Iterator<Row> iterator = Arrays.stream(value).iterator();
+
+//            Iterator<Row> iterator = value.iterator();
 
             while (iterator.hasNext()){
 
@@ -86,6 +82,10 @@ public class ParserJsonArray extends TableFunction<Row> {
 
     }
 
+//    private void collect(Row of) {
+//        collect(of);
+//    }
+
 
 //    @Override
 //    public TypeInformation<Row> getResultType() {
@@ -94,35 +94,35 @@ public class ParserJsonArray extends TableFunction<Row> {
 
     // the automatic, reflection-based type inference is disabled and
     // replaced by the following logic
-    @Override
-    public TypeInference getTypeInference(DataTypeFactory typeFactory) {
-
-        return TypeInference
-                .newBuilder()
-                // specify typed arguments
-                // parameters will be casted implicitly to those types if necessary
-                .typedArguments(DataTypes.ROW(DataTypes.STRING(),DataTypes.STRING()))
-                // specify a strategy for the result data type of the function
-                .outputTypeStrategy(callContext -> {
-
-                    if (!callContext.isArgumentLiteral(1) || callContext.isArgumentNull(1)) {
-                        throw callContext.newValidationError("Literal expected for second argument.");
-                    }
-
-                    // return a data type based on a literal
-                    final String literal = callContext.getArgumentValue(1, String.class).orElse("STRING");
-                    switch (literal) {
-                        case "INT":
-                            return Optional.of(DataTypes.INT().notNull());
-                        case "DOUBLE":
-                            return Optional.of(DataTypes.DOUBLE().notNull());
-                        case "STRING":
-                        default:
-                            return Optional.of(DataTypes.STRING());
-                    }
-
-                })
-                .build();
-
-    }
+//    @Override
+//    public TypeInference getTypeInference(DataTypeFactory typeFactory) {
+//
+//        return TypeInference
+//                .newBuilder()
+//                // specify typed arguments
+//                // parameters will be casted implicitly to those types if necessary
+//                .typedArguments(DataTypes.ROW(DataTypes.STRING(),DataTypes.STRING()))
+//                // specify a strategy for the result data type of the function
+//                .outputTypeStrategy(callContext -> {
+//
+//                    if (!callContext.isArgumentLiteral(1) || callContext.isArgumentNull(1)) {
+//                        throw callContext.newValidationError("Literal expected for second argument.");
+//                    }
+//
+//                    // return a data type based on a literal
+//                    final String literal = callContext.getArgumentValue(1, String.class).orElse("STRING");
+//                    switch (literal) {
+//                        case "INT":
+//                            return Optional.of(DataTypes.INT().notNull());
+//                        case "DOUBLE":
+//                            return Optional.of(DataTypes.DOUBLE().notNull());
+//                        case "STRING":
+//                        default:
+//                            return Optional.of(DataTypes.STRING());
+//                    }
+//
+//                })
+//                .build();
+//
+//    }
 }

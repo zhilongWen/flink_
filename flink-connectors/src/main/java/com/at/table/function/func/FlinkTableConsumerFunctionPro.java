@@ -13,6 +13,7 @@ public class FlinkTableConsumerFunctionPro {
 
         //https://blog.csdn.net/u010002184/article/details/125779990
 
+        // kafka send：{"name":"JasonLee","data":[{"content_type":"flink","url":"111"},{"content_type":"spark","url":"222"}, {"content_type":"hadoop","url":"333"}]}
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
@@ -53,8 +54,6 @@ public class FlinkTableConsumerFunctionPro {
 | +I |                       JasonLee |                         hadoop |                            333 |
  */
 
-
-
         // UNNEST
 //        tableEnv.executeSql("select name,content_type,url\n"
 //                + "from kafka_source_table, UNNEST(`data`) AS t (content_type,url)").print();
@@ -68,7 +67,6 @@ public class FlinkTableConsumerFunctionPro {
 | +I |                       JasonLee |                         hadoop |                            333 |
 
 */
-
 
 //        tableEnv.executeSql("select name,content_type,url\n"
 //                + "from kafka_source_table left join UNNEST(`data`) AS t (content_type,url) on true\n").print();
@@ -86,7 +84,15 @@ public class FlinkTableConsumerFunctionPro {
 
         tableEnv.executeSql("select name,content_type,url\n"
                 + "from kafka_source_table, lateral TABLE (ParserJsonArray(`data`)) AS t (content_type,url)\n").print();
+/*
++----+--------------------------------+--------------------------------+--------------------------------+
+| op |                           name |                   content_type |                            url |
++----+--------------------------------+--------------------------------+--------------------------------+
+| +I |                       JasonLee |                          flink |                            111 |
+| +I |                       JasonLee |                          spark |                            222 |
+| +I |                       JasonLee |                         hadoop |                            333 |
 
+       */
 
     }
 
