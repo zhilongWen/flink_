@@ -147,6 +147,12 @@ under the License.
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.30</version>
+		</dependency>
 
 
 		<!-- Add logging framework, to produce console output when running in the IDE. -->
@@ -169,6 +175,11 @@ under the License.
 			<version>${log4j.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+
+
+
+
+
 	</dependencies>
 
 	<build>

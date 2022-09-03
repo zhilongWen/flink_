@@ -1,4 +1,4 @@
-package com.at.testp;
+package com.at.test;
 
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;

@@ -1,4 +1,4 @@
-package com.at.testp;
+package com.at.test;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.at.WriteHiveTestBean;
