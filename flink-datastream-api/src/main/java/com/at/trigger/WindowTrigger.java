@@ -2,7 +2,6 @@ package com.at.trigger;
 
 import com.at.pojo.Event;
 import com.at.source.ClickSource;
-import javafx.beans.binding.StringExpression;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.typeinfo.Types;

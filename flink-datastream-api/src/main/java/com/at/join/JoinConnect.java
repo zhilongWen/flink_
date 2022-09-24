@@ -2,7 +2,6 @@ package com.at.join;
 
 import com.at.pojo.Event;
 import com.at.source.ClickSource;
-import com.sun.org.apache.regexp.internal.RE;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.CoFlatMapFunction;

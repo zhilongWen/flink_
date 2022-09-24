@@ -11,7 +11,6 @@ import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTime
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
-import sun.plugin.services.WNetscape4BrowserService;
 
 import java.sql.Timestamp;
 import java.time.Duration;
