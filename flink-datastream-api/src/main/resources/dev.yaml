@@ -1,0 +1,65 @@
+
+# 创建日期
+date: 20221014
+# 应用基本信息
+app:
+  name: TestYaml
+  version: v1.0
+  creator: zero
+# redis 集群信息
+redis:
+  cluster:
+    node: NC-0001
+  password: xxx-password # redis 密码
+  timeout: 6000
+  jedis:
+    pool:
+      max-active: 1000
+      max-wait: -1
+      max-idle: 10
+      min-idle: 5
+
+# 数据源
+server:
+  datasource:
+    mysql:
+      - NC-001
+      - SD-002
+      - KPL-911
+    redis-cluster:
+      - node1:6379
+      - node2:6379
+      - node3:6379
+    kafka-servers:
+      - appserver
+      - wxserver
+      - pcserver
+    clients:
+      - 0
+      - 1
+      - 4
+      - 5
+
+
+config:
+  - dev:
+      name: 测试
+      type:
+        - local
+        - preproduct
+        - product
+      port: 9098
+  - production:
+      name: 生产
+      type:
+        - er
+        - et
+        - ey
+        - op
+      port:
+        - 9092
+        - 9870
+        - 1099
+
+
+
