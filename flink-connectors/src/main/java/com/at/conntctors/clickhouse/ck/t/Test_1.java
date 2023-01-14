@@ -153,7 +153,7 @@ public class Test_1 {
                             @Override
                             public ClickHouseBatchStatementExecutor<Tuple4<Integer, String, Double, String>> apply(RuntimeContext runtimeContext) {
                                 return ClickHouseBatchStatementExecutor.simple(
-                                        "insert into st_order_mt_db01_all values(?,?,?,?)",
+                                        "insert into st_order_mt_db01 values(?,?,?,?)",
                                         new ClickHouseStatementBuilder<Tuple4<Integer, String, Double, String>>() {
                                             @Override
                                             public void accept(PreparedStatement statement, Tuple4<Integer, String, Double, String> t) throws SQLException {

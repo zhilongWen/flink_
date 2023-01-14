@@ -32,15 +32,6 @@ public interface ClickHouseBatchStatementExecutor<T> extends Serializable {
      */
     void closeStatements() throws SQLException;
 
-//    static <T, K> JdbcBatchStatementExecutor<T> keyed(
-//            String sql, Function<T, K> keyExtractor, JdbcStatementBuilder<K> statementBuilder) {
-//        return new KeyedBatchStatementExecutor<>(sql, keyExtractor, statementBuilder);
-//    }
-//
-//    static <T, V> JdbcBatchStatementExecutor<T> simple(
-//            String sql, JdbcStatementBuilder<V> paramSetter, Function<T, V> valueTransformer) {
-//        return new SimpleBatchStatementExecutor<>(sql, paramSetter, valueTransformer);
-//    }
 
     static <T, V> ClickHouseBatchStatementExecutor<T> simple(
             String sql, ClickHouseStatementBuilder<V> paramSetter, Function<T, V> valueTransformer) {
