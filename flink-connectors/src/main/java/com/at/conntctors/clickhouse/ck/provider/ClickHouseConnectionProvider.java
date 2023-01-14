@@ -8,12 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Enumeration;
-import java.util.Properties;
+import java.sql.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author zero
@@ -30,10 +27,22 @@ public class ClickHouseConnectionProvider implements JdbcConnectionProvider, Ser
     private transient Driver loadedDriver;
     private transient Connection connection;
 
-    protected final String DRIVER_NAME = "ru.yandex.clickhouse.ClickHouseDriver";
+
+    private static final String CLUSTER_SHARD_SQL = "SELECT `shard_num`, `host_address`, `port` FROM system.clusters WHERE cluster = ? ORDER BY `shard_num`, `replica_num` ASC";
+
+    private String dbName;
+    private Optional<String> userName;
+    private Optional<String> password;
+    private List<String> shardUrls;
+
+    private final String PREFIX = "jdbc:clickhouse://";
+    private final String DRIVER_NAME = "ru.yandex.clickhouse.ClickHouseDriver";
 
     public ClickHouseConnectionProvider(ClickHouseConnectorOptions connOptions) {
         this.connOptions = connOptions;
+        this.dbName = connOptions.getUrl().substring(connOptions.getUrl().lastIndexOf('/'));
+        userName = connOptions.getUsername();
+        password = connOptions.getPassword();
     }
 
     @Nullable
@@ -57,8 +66,10 @@ public class ClickHouseConnectionProvider implements JdbcConnectionProvider, Ser
 
         Driver driver = getLoadedDriver();
         Properties info = new Properties();
-        connOptions.getUsername().ifPresent(user -> info.setProperty("user", user));
-        connOptions.getPassword().ifPresent(password -> info.setProperty("password", password));
+
+        userName.ifPresent(user -> info.setProperty("user", user));
+        password.ifPresent(password -> info.setProperty("password", password));
+
         connection = driver.connect(connOptions.getUrl(), info);
 
         if (connection == null) {
@@ -118,4 +129,46 @@ public class ClickHouseConnectionProvider implements JdbcConnectionProvider, Ser
         closeConnection();
         return getOrEstablishConnection();
     }
+
+    // ======================================================================
+
+
+    private List<List<String>> getClusterSharedUrls() throws SQLException, ClassNotFoundException {
+
+        // key = shard_num，value = url
+        Map<Integer, List<String>> map = new TreeMap<Integer, List<String>>();
+
+        Connection conn = getOrEstablishConnection();
+
+        PreparedStatement stmt = conn.prepareStatement(CLUSTER_SHARD_SQL);
+
+        stmt.setString(1, connOptions.getCluster().get());
+
+        ResultSet resultSet = stmt.executeQuery();
+
+        while (resultSet.next()) {
+
+            int shardNum = resultSet.getInt("shard_num");
+            String hostAddress = resultSet.getString("host_address");
+            int port = resultSet.getInt("port");
+
+            //jdbc:clickhouse://hadoop102:8123/testdb01
+            String url = PREFIX + hostAddress + ":" + port + "/" + dbName;
+
+            map.computeIfAbsent(shardNum, k -> new ArrayList<>());
+            map.get(shardNum).add(url);
+
+        }
+
+        return map.values().stream().collect(Collectors.toList());
+
+    }
+
+    public void getShardConnectionAny(List<String> shardUrls){
+
+
+
+    }
+
+
 }
