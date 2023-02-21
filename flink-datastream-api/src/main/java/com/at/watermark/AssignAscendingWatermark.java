@@ -19,6 +19,7 @@ public class AssignAscendingWatermark {
 
         env.setParallelism(1);
 
+
         // 每隔1分钟插入一次水位线  默认200ms
         env.getConfig().setAutoWatermarkInterval(60 * 1000L);
 
@@ -31,6 +32,8 @@ public class AssignAscendingWatermark {
                 )
                 .print();
 
+
+        
 
         env.execute();
 
