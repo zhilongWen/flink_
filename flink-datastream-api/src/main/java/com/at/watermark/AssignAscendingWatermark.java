@@ -33,7 +33,7 @@ public class AssignAscendingWatermark {
                 .print();
 
 
-        
+
 
         env.execute();
 

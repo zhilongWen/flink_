@@ -53,6 +53,18 @@ public class ProcessFunctions {
                     }
                 });
 
+//        sourceStream
+//                .process(new ProcessFunction<Integer, Integer>() {
+//                    @Override
+//                    public void processElement(Integer value, Context ctx, Collector<Integer> out) throws Exception {
+//                        if (value % 10 == 1){
+//                            out.collect(value);
+//                            out.collect(value);
+//                        }
+//                    }
+//                })
+//                .print();
+
 
         // 求平均值
 //        sourceStream
