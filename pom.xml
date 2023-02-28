@@ -18,6 +18,7 @@
         <module>stream_framework</module>
         <module>flink-connector-hudi-1.14x</module>
         <module>flink-connectors/hive-connector</module>
+        <module>flink-ml</module>
     </modules>
 
     <properties>
