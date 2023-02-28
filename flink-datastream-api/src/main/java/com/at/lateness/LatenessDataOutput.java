@@ -29,7 +29,7 @@ public class LatenessDataOutput {
 
 
         SingleOutputStreamOperator<String> result = env
-                .socketTextStream("127.0.0.1", 9099)
+                .socketTextStream("10.199.241.213", 9008)
                 .map(new MapFunction<String, Tuple2<String, Long>>() {
                     @Override
                     public Tuple2<String, Long> map(String value) throws Exception {
