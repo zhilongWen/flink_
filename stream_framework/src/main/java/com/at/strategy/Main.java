@@ -11,7 +11,7 @@ public class Main {
 
         String strategy = "C";
 
-        if ("A".equals(strategy)) {
+        if ("Strategy".equals(strategy)) {
             System.out.println("买一送一");
         } else if ("B".equals(strategy)) {
             System.out.println("满100减50");
@@ -25,7 +25,7 @@ public class Main {
         System.out.println("=========================");
 
 
-        Strategy.instance("C",(t -> t.strategy()));
+        com.at.strategy.Strategy.instance("C",(t -> t.strategy()));
 
 
     }

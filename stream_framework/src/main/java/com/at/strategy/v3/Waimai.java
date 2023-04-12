@@ -1,7 +1,7 @@
 package com.at.strategy.v3;
 
-import com.at.t1.p1.WaimaiRequest;
-import com.at.t1.p1.WaimaiService;
+import com.at.strategy.v1.WaimaiRequest;
+import com.at.strategy.v1.WaimaiService;
 
 /**
  * @create 2023-01-14

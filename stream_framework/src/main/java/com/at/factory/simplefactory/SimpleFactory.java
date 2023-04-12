@@ -6,7 +6,7 @@ package com.at.factory.simplefactory;
 public class SimpleFactory {
 
     public static Product createProduct(String type) {
-        if (type == "A") {
+        if (type == "Strategy") {
             return new ProductA();
         } else {
             return new ProductB();

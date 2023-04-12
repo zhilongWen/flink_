@@ -1,7 +1,8 @@
 package com.at.strategy.v3;
 
-import com.at.t1.p1.HotelRequest;
-import com.at.t1.p1.HotelService;
+
+import com.at.strategy.v1.HotelRequest;
+import com.at.strategy.v1.HotelService;
 
 /**
  * @create 2023-01-14

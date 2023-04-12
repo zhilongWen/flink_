@@ -1,7 +1,8 @@
 package com.at.strategy.v3;
 
-import com.at.t1.p1.FoodRequest;
-import com.at.t1.p1.FoodService;
+
+import com.at.strategy.v1.FoodRequest;
+import com.at.strategy.v1.FoodService;
 
 /**
  * @create 2023-01-14
