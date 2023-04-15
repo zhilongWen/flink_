@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+option java_package = "com.at.proto";
+option java_multiple_files = false;
+option java_outer_classname = "UserMessageProto";
+//option java_string_check_utf8 = true;
+
+message UserMessage{
+
+  uint64 update_time = 1;
+
+  string name = 2;
+
+  Gender gender = 3;
+
+  int32 birthday = 4;
+
+  repeated GoodsInfo clk_good_seq = 5;
+
+  map<string, Hobby> hobby_info = 6;
+
+}
+
+enum Gender{
+  MAN = 0;
+  WOMAN = 1;
+  OTHER = 2;
+}
+
+message GoodsInfo{
+
+  uint64 goods_id = 1;
+
+  uint32 brand_id = 2;
+
+  uint32 cat1_id = 3;
+
+  uint32 cat2_id = 4;
+
+  uint32 cat3_id = 5;
+
+  uint64 spu_id = 6;
+
+}
+
+message Hobby{
+
+  string key_flag = 1;
+
+  string name = 2;
+
+  repeated string hobby_addr = 3;
+
+}
+
+
