@@ -18,6 +18,8 @@
         <module>stream_framework</module>
         <module>flink-connector-hudi-1.14x</module>
         <module>flink-connectors/hive-connector</module>
+        <module>flink-iceberg</module>
+        <module>untitled1</module>
     </modules>
 
     <properties>
