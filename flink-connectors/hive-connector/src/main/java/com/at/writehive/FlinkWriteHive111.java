@@ -10,7 +10,6 @@ import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.SqlDialect;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
-import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
 
 import java.util.concurrent.TimeUnit;
 
@@ -20,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class FlinkWriteHive111 {
 
     public static void main(String[] args) throws Exception{
+        System.setProperty("HADOOP_USER_NAME", "root");
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
@@ -58,7 +58,7 @@ public class FlinkWriteHive111 {
         // set the HiveCatalog as the current catalog of the session
         tableEnv.useCatalog("myhive");
         tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
-        tableEnv.useDatabase("testdb");
+        tableEnv.useDatabase("db01");
 
 
         tableEnv.getConfig().setSqlDialect(SqlDialect.DEFAULT);
