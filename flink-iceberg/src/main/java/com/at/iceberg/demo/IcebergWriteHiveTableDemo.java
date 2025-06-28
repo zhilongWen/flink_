@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.api.java.hadoop.mapred.utils.HadoopUtils;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.StateBackendOptions;
@@ -19,29 +18,12 @@ import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.api.SqlDialect;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.flink.table.catalog.exceptions.CatalogException;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.conf.HiveConf;
-
-import javax.annotation.Nullable;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-
-import static org.apache.flink.table.catalog.hive.HiveCatalog.isEmbeddedMetastore;
-import static org.apache.flink.table.catalog.hive.util.HiveTableUtil.getHadoopConfiguration;
-import static org.apache.flink.util.StringUtils.isNullOrWhitespaceOnly;
 
 public class IcebergWriteHiveTableDemo {
     public static void main(String[] args) throws Exception {
 
         System.setProperty("HADOOP_USER_NAME", "root");
-
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        classLoader.setClassAssertionStatus("jdk.internal.loader.ClassLoaders$AppClassLoader", true);
 
         Configuration defaultConfig = new Configuration();
         defaultConfig.setString("rest.bind-port", "8081");
@@ -107,6 +89,8 @@ public class IcebergWriteHiveTableDemo {
                 .name("user_behaviors_parse")
                 .setParallelism(4);
 
+        sourceStream.print();
+//
         Schema tableSchema = Schema.newBuilder()
                 .column("userId", DataTypes.INT())
                 .column("itemId", DataTypes.BIGINT())
@@ -125,17 +109,17 @@ public class IcebergWriteHiveTableDemo {
         String hiveConfDir = "/Users/wenzhilong/warehouse/space/flink_/conf";
         String version = "3.1.2";
 
-//        HiveCatalog hive = new HiveCatalog(catalogName, defaultDatabase, hiveConfDir, version);
+        HiveCatalog hive = new HiveCatalog(catalogName, defaultDatabase, hiveConfDir, version);
 
-        HiveConf hiveConf = createHiveConf(hiveConfDir, null);
-        hiveConf.set("hive.metastore.uris", "thrift://hadoop102:9083");
-        HiveCatalog hive = new HiveCatalog(catalogName, defaultDatabase, hiveConf, version);
+//        HiveConf hiveConf = createHiveConf(hiveConfDir, null);
+//        hiveConf.set("hive.metastore.uris", "thrift://hadoop102:9083");
+//        HiveCatalog hive = new HiveCatalog(catalogName, defaultDatabase, hiveConf, version);
 
         tableEnv.registerCatalog(catalogName, hive);
 
         tableEnv.useCatalog(catalogName);
         tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
-        tableEnv.useDatabase("iceberg_db");
+        tableEnv.useDatabase("flink_db");
 
         tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
         tableEnv.executeSql("create table if not exists hive_stream_table_user_behaviors(\n"
@@ -147,7 +131,7 @@ public class IcebergWriteHiveTableDemo {
                 + ")COMMENT 'flink create table hive_stream_table_user_behaviors'\n"
                 + "PARTITIONED BY (`dt` string,`hm` string,`mm` string)\n"
                 + "STORED AS PARQUET\n"
-                + "LOCATION '/warehouse/iceberg_db.db/hive_stream_table_user_behaviors'\n"
+                + "LOCATION 'hdfs://10.211.55.102:8020/user/hive/warehouse/flink_db.db/hive_stream_table_user_behaviors'\n"
                 + "TBLPROPERTIES (\n"
                 + "        -- using default partition-name order to load the latest partition every 12h (the most recommended and convenient way)\n"
                 + "        'streaming-source.enable' = 'true',\n"
@@ -185,67 +169,67 @@ public class IcebergWriteHiveTableDemo {
 //        env.execute("IcebergWriteHdfsFileDemo");
     }
 
-    public static final String HIVE_SITE_FILE = "hive-site.xml";
-
-    static HiveConf createHiveConf(@Nullable String hiveConfDir, @Nullable String hadoopConfDir) {
-        // create HiveConf from hadoop configuration with hadoop conf directory configured.
-        org.apache.hadoop.conf.Configuration hadoopConf = null;
-        if (isNullOrWhitespaceOnly(hadoopConfDir)) {
-            for (String possibleHadoopConfPath :
-                    HadoopUtils.possibleHadoopConfPaths(
-                            new org.apache.flink.configuration.Configuration())) {
-                hadoopConf = getHadoopConfiguration(possibleHadoopConfPath);
-                if (hadoopConf != null) {
-                    break;
-                }
-            }
-        } else {
-            hadoopConf = getHadoopConfiguration(hadoopConfDir);
-            if (hadoopConf == null) {
-                String possiableUsedConfFiles =
-                        "core-site.xml | hdfs-site.xml | yarn-site.xml | mapred-site.xml";
-                throw new CatalogException(
-                        "Failed to load the hadoop conf from specified path:" + hadoopConfDir,
-                        new FileNotFoundException(
-                                "Please check the path none of the conf files ("
-                                        + possiableUsedConfFiles
-                                        + ") exist in the folder."));
-            }
-        }
-        if (hadoopConf == null) {
-            hadoopConf = new org.apache.hadoop.conf.Configuration();
-        }
-        // ignore all the static conf file URLs that HiveConf may have set
-        HiveConf.setHiveSiteLocation(null);
-        HiveConf.setLoadMetastoreConfig(false);
-        HiveConf.setLoadHiveServer2Config(false);
-        HiveConf hiveConf = new HiveConf(hadoopConf, HiveConf.class);
-
-        System.out.println("Setting hive conf dir as " + hiveConfDir);
-
-        if (hiveConfDir != null) {
-            Path hiveSite = new Path(hiveConfDir, HIVE_SITE_FILE);
-            if (!hiveSite.toUri().isAbsolute()) {
-                // treat relative URI as local file to be compatible with previous behavior
-                hiveSite = new Path(new File(hiveSite.toString()).toURI());
-            }
-            try (InputStream inputStream = hiveSite.getFileSystem(hadoopConf).open(hiveSite)) {
-                hiveConf.addResource(inputStream, hiveSite.toString());
-                // trigger a read from the conf so that the input stream is read
-                isEmbeddedMetastore(hiveConf);
-            } catch (IOException e) {
-                throw new CatalogException(
-                        "Failed to load hive-site.xml from specified path:" + hiveSite, e);
-            }
-        } else {
-            // user doesn't provide hive conf dir, we try to find it in classpath
-            URL hiveSite =
-                    Thread.currentThread().getContextClassLoader().getResource(HIVE_SITE_FILE);
-            if (hiveSite != null) {
-                System.out.println("Found " + HIVE_SITE_FILE + " in classpath: " + hiveSite);
-                hiveConf.addResource(hiveSite);
-            }
-        }
-        return hiveConf;
-    }
+//    public static final String HIVE_SITE_FILE = "hive-site.xml";
+//
+//    static HiveConf createHiveConf(@Nullable String hiveConfDir, @Nullable String hadoopConfDir) {
+//        // create HiveConf from hadoop configuration with hadoop conf directory configured.
+//        org.apache.hadoop.conf.Configuration hadoopConf = null;
+//        if (isNullOrWhitespaceOnly(hadoopConfDir)) {
+//            for (String possibleHadoopConfPath :
+//                    HadoopUtils.possibleHadoopConfPaths(
+//                            new org.apache.flink.configuration.Configuration())) {
+//                hadoopConf = getHadoopConfiguration(possibleHadoopConfPath);
+//                if (hadoopConf != null) {
+//                    break;
+//                }
+//            }
+//        } else {
+//            hadoopConf = getHadoopConfiguration(hadoopConfDir);
+//            if (hadoopConf == null) {
+//                String possiableUsedConfFiles =
+//                        "core-site.xml | hdfs-site.xml | yarn-site.xml | mapred-site.xml";
+//                throw new CatalogException(
+//                        "Failed to load the hadoop conf from specified path:" + hadoopConfDir,
+//                        new FileNotFoundException(
+//                                "Please check the path none of the conf files ("
+//                                        + possiableUsedConfFiles
+//                                        + ") exist in the folder."));
+//            }
+//        }
+//        if (hadoopConf == null) {
+//            hadoopConf = new org.apache.hadoop.conf.Configuration();
+//        }
+//        // ignore all the static conf file URLs that HiveConf may have set
+//        HiveConf.setHiveSiteLocation(null);
+//        HiveConf.setLoadMetastoreConfig(false);
+//        HiveConf.setLoadHiveServer2Config(false);
+//        HiveConf hiveConf = new HiveConf(hadoopConf, HiveConf.class);
+//
+//        System.out.println("Setting hive conf dir as " + hiveConfDir);
+//
+//        if (hiveConfDir != null) {
+//            Path hiveSite = new Path(hiveConfDir, HIVE_SITE_FILE);
+//            if (!hiveSite.toUri().isAbsolute()) {
+//                // treat relative URI as local file to be compatible with previous behavior
+//                hiveSite = new Path(new File(hiveSite.toString()).toURI());
+//            }
+//            try (InputStream inputStream = hiveSite.getFileSystem(hadoopConf).open(hiveSite)) {
+//                hiveConf.addResource(inputStream, hiveSite.toString());
+//                // trigger a read from the conf so that the input stream is read
+//                isEmbeddedMetastore(hiveConf);
+//            } catch (IOException e) {
+//                throw new CatalogException(
+//                        "Failed to load hive-site.xml from specified path:" + hiveSite, e);
+//            }
+//        } else {
+//            // user doesn't provide hive conf dir, we try to find it in classpath
+//            URL hiveSite =
+//                    Thread.currentThread().getContextClassLoader().getResource(HIVE_SITE_FILE);
+//            if (hiveSite != null) {
+//                System.out.println("Found " + HIVE_SITE_FILE + " in classpath: " + hiveSite);
+//                hiveConf.addResource(hiveSite);
+//            }
+//        }
+//        return hiveConf;
+//    }
 }

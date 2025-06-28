@@ -28,16 +28,20 @@ under the License.
     <artifactId>flink-iceberg</artifactId>
     <packaging>jar</packaging>
 
-    <name>Flink Quickstart Job</name>
+    <name>flink-iceberg</name>
 
     <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <flink.version>1.18.0</flink.version>
-        <target.java.version>11</target.java.version>
+        <flink.version>1.16.0</flink.version>
+        <target.java.version>1.8</target.java.version>
         <scala.binary.version>2.12</scala.binary.version>
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
         <log4j.version>2.17.1</log4j.version>
+        <iceberg.version>1.5.0</iceberg.version>
     </properties>
 
     <repositories>
@@ -70,14 +74,40 @@ under the License.
             <scope>provided</scope>
         </dependency>
 
-        <!-- Add connector dependencies here. They must be in the default scope (compile). -->
+        <!-- Add logging framework, to produce console output when running in the IDE. -->
+        <!-- These dependencies are excluded from the application JAR by default. -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>${log4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
 
 
+
+        <!--        <dependency>-->
+        <!--            <groupId>org.apache.flink</groupId>-->
+        <!--            <artifactId>flink-connector-kafka</artifactId>-->
+        <!--            <version>3.0.0-1.17</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka</artifactId>
-            <version>3.0.0-1.17</version>
+            <version>${flink.version}</version>
         </dependency>
+
 
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -117,12 +147,17 @@ under the License.
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.iceberg/iceberg-flink-runtime-1.18 -->
+        <!--        <dependency>-->
+        <!--            <groupId>org.apache.iceberg</groupId>-->
+        <!--            <artifactId>iceberg-flink-runtime-1.18</artifactId>-->
+        <!--            <version>1.9.0</version>-->
+        <!--        </dependency>-->
+        <!-- https://mvnrepository.com/artifact/org.apache.iceberg/iceberg-flink-runtime-1.16 -->
         <dependency>
             <groupId>org.apache.iceberg</groupId>
-            <artifactId>iceberg-flink-runtime-1.18</artifactId>
-            <version>1.9.0</version>
+            <artifactId>iceberg-flink-runtime-1.16</artifactId>
+            <version>1.5.0</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -167,67 +202,53 @@ under the License.
             <version>3.1.2</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.apache.hive</groupId>-->
-<!--            <artifactId>hive-exec</artifactId>-->
-<!--            <version>4.0.1</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.apache.hive</groupId>-->
+        <!--            <artifactId>hive-exec</artifactId>-->
+        <!--            <version>4.0.1</version>-->
+        <!--        </dependency>-->
 
         <!-- https://mvnrepository.com/artifact/org.apache.iceberg/iceberg-hive-runtime -->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.iceberg</groupId>-->
-<!--            <artifactId>iceberg-hive-runtime</artifactId>-->
-<!--            <version>1.9.0</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.apache.iceberg</groupId>-->
+        <!--            <artifactId>iceberg-hive-runtime</artifactId>-->
+        <!--            <version>1.9.0</version>-->
+        <!--        </dependency>-->
+        <!-- https://mvnrepository.com/artifact/org.apache.iceberg/iceberg-hive-runtime -->
+        <dependency>
+            <groupId>org.apache.iceberg</groupId>
+            <artifactId>iceberg-hive-runtime</artifactId>
+            <version>1.5.0</version>
+        </dependency>
 
-        <!-- Add logging framework, to produce console output when running in the IDE. -->
-        <!-- These dependencies are excluded from the application JAR by default. -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${log4j.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
-            <scope>runtime</scope>
-        </dependency>
     </dependencies>
 
     <build>
         <plugins>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M7</version>
-                <configuration>
-                    <argLine>--add-opens java.base/jdk.internal.loader=ALL-UNNAMED</argLine>
-                    <argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <executable>java</executable>
-                    <arguments>
-                        <argument>--add-opens</argument>
-                        <argument>java.base/jdk.internal.loader=ALL-UNNAMED</argument>
-                        <argument>--add-opens java.base/java.util=ALL-UNNAMED</argument>
-                        <!-- 其他参数 -->
-                    </arguments>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-surefire-plugin</artifactId>-->
+<!--                <version>3.0.0-M7</version>-->
+<!--                <configuration>-->
+<!--                    <argLine>&#45;&#45;add-opens java.base/jdk.internal.loader=ALL-UNNAMED</argLine>-->
+<!--                    <argLine>&#45;&#45;add-opens java.base/java.util=ALL-UNNAMED</argLine>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>org.codehaus.mojo</groupId>-->
+<!--                <artifactId>exec-maven-plugin</artifactId>-->
+<!--                <version>3.1.0</version>-->
+<!--                <configuration>-->
+<!--                    <executable>java</executable>-->
+<!--                    <arguments>-->
+<!--                        <argument>&#45;&#45;add-opens</argument>-->
+<!--                        <argument>java.base/jdk.internal.loader=ALL-UNNAMED</argument>-->
+<!--                        <argument>&#45;&#45;add-opens java.base/java.util=ALL-UNNAMED</argument>-->
+<!--                        &lt;!&ndash; 其他参数 &ndash;&gt;-->
+<!--                    </arguments>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
 
             <!-- Java Compiler -->
             <plugin>
