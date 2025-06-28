@@ -173,6 +173,13 @@ under the License.
 <!--            <version>4.0.1</version>-->
 <!--        </dependency>-->
 
+        <!-- https://mvnrepository.com/artifact/org.apache.iceberg/iceberg-hive-runtime -->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.iceberg</groupId>-->
+<!--            <artifactId>iceberg-hive-runtime</artifactId>-->
+<!--            <version>1.9.0</version>-->
+<!--        </dependency>-->
+
         <!-- Add logging framework, to produce console output when running in the IDE. -->
         <!-- These dependencies are excluded from the application JAR by default. -->
         <dependency>
