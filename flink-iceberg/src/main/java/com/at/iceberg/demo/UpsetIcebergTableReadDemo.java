@@ -71,6 +71,6 @@ public class UpsetIcebergTableReadDemo {
 
         tableEnv.executeSql("show tables").print();
 
-        tableEnv.executeSql("SELECT * FROM word_count_tbl_1").print();
+        tableEnv.executeSql("SELECT * FROM word_count_tbl").print();
     }
 }
