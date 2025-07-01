@@ -20,6 +20,14 @@ public class WordCount {
         this.word = word;
     }
 
+    public int getCnt() {
+        return cnt;
+    }
+
+    public void setCnt(int cnt) {
+        this.cnt = cnt;
+    }
+
     @Override
     public String toString() {
         return "WordCount{" +
