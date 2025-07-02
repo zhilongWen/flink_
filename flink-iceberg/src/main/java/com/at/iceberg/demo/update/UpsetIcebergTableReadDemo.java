@@ -1,4 +1,4 @@
-package com.at.iceberg.demo;
+package com.at.iceberg.demo.update;
 
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
@@ -9,16 +9,18 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
-public class UpsetIcebergTableDemo {
+public class UpsetIcebergTableReadDemo {
     public static void main(String[] args) throws Exception {
 
         System.setProperty("HADOOP_USER_NAME", "root");
 
         Configuration defaultConfig = new Configuration();
-        defaultConfig.setString("rest.bind-port", "8081");
+        defaultConfig.setString("rest.bind-port", "8082");
         StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(defaultConfig);
         EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
+
+        env.setParallelism(1);
 
         env.setRestartStrategy(
                 org.apache.flink.api.common.restartstrategy.RestartStrategies.fixedDelayRestart(
@@ -34,9 +36,9 @@ public class UpsetIcebergTableDemo {
         // set mode to exactly-once (this is the default)
         env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         // make sure 500 ms of progress happen between checkpoints
-        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(60 * 1000);
+        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(10 * 1000);
         // checkpoints have to complete within one minute, or are discarded
-        env.getCheckpointConfig().setCheckpointTimeout(60 * 1000);
+        env.getCheckpointConfig().setCheckpointTimeout(10 * 1000);
         // only two consecutive checkpoint failures are tolerated
         env.getCheckpointConfig().setTolerableCheckpointFailureNumber(3);
         // allow only one checkpoint to be in progress at the same time
@@ -69,21 +71,6 @@ public class UpsetIcebergTableDemo {
 
         tableEnv.executeSql("show tables").print();
 
-//        tableEnv.executeSql("CREATE TABLE if not exists sample_3 (\n"
-//                + "  id INT UNIQUE COMMENT 'unique id',\n"
-//                + "  data STRING NOT NULL,\n"
-//                + "  PRIMARY KEY(id) NOT ENFORCED\n"
-//                + ") with (\n"
-//                + "  'format-version'='2', \n"
-//                + "  'write.upsert.enabled'='true'\n"
-//                + ")");
-//
-//        tableEnv.executeSql("INSERT INTO sample_3 VALUES (1, 'a'), (2, 'b'), (3, 'c'), (4, 'd'), (5, 'e')");
-
-//        tableEnv.executeSql("SELECT * FROM sample_3").print();
-
-//        tableEnv.executeSql("INSERT INTO sample_3 VALUES (1, 'c')");
-
-        tableEnv.executeSql("SELECT * FROM sample_3").print();
+        tableEnv.executeSql("SELECT * FROM word_count_tbl").print();
     }
 }

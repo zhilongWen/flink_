@@ -1,4 +1,4 @@
-package com.at.iceberg.demo;
+package com.at.iceberg.demo.update;
 
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
@@ -9,7 +9,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
-public class UpsetIcebergTableDemo_2 {
+public class UpsetIcebergTableDemo_3 {
     public static void main(String[] args) throws Exception {
 
         System.setProperty("HADOOP_USER_NAME", "root");
@@ -70,9 +70,11 @@ public class UpsetIcebergTableDemo_2 {
         //
         //  {"word":"a","cnt":10}
         //  {"word":"e","cnt":11}
+        // {"word":"a","word_type":"0-1"}
         String sourceSQL = "CREATE TABLE if not exists default_catalog.default_database.kafka_source_tbl(\n"
                 + "    word STRING,\n"
-                + "    cnt INT\n"
+                + "    cnt INT,\n"
+                + "    word_type STRING\n"
                 + ") \n"
                 + "WITH \n"
                 + "(\n"
@@ -96,7 +98,8 @@ public class UpsetIcebergTableDemo_2 {
         tableEnv.executeSql("use catalog hadoop_catalog");
         String ddl = "CREATE TABLE if not exists word_count_tbl (\n"
                 + "  word STRING UNIQUE COMMENT 'unique id',\n"
-                + "  cnt INT NOT NULL,\n"
+                + "  cnt INT  ,\n"
+                + "  word_type STRING  ,\n"
                 + "  PRIMARY KEY(word) NOT ENFORCED\n"
                 + ") with (\n"
                 + "  'format-version'='2', \n"
@@ -104,12 +107,30 @@ public class UpsetIcebergTableDemo_2 {
                 + ")";
         tableEnv.executeSql(ddl);
 
+        // 不支持
+        // ALTER TABLE hadoop_prod.default.sample1 ADD COLUMN pointsm.value.b int
+//        tableEnv.executeSql("ALTER TABLE word_count_tbl ADD COLUMN word_type STRING DEFAULT IS NULL,\n");
+
+
         tableEnv.executeSql("use catalog default_catalog");
         tableEnv.executeSql(sourceSQL);
 
         tableEnv.executeSql("use catalog hadoop_catalog");
-        String sinkSQL = "insert into word_count_tbl select word,cnt from default_catalog.default_database.kafka_source_tbl";
+        // 不支持
+//        String sinkSQL = "insert into word_count_tbl select word,word_type from default_catalog.default_database.kafka_source_tbl";
+
+
+
+        String sinkSQL = "MERGE INTO word_count_tbl a\n"
+                + "USING (SELECT word, word_type FROM default_catalog.default_database.kafka_source_tbl) AS b \n"
+                + "ON a.word = b.word \n"
+                + "WHEN MATCHED THEN UPDATE SET word_type = b.word_type \n"
+                + "WHEN NOT MATCHED THEN INSERT (word, word_type) VALUES (b.word, b.word_type)";
+
+
         tableEnv.executeSql(sinkSQL);
+
+//        tableEnv.executeSql("select * from word_count_tbl").print();
 
 
         env.execute();

@@ -1,6 +1,7 @@
-package com.at.iceberg.demo;
+package com.at.iceberg.demo.update;
 
 import com.alibaba.fastjson.JSON;
+import com.at.iceberg.demo.WordCount;
 import com.google.common.collect.ImmutableMap;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
@@ -20,7 +21,10 @@ import org.apache.flink.table.data.GenericRowData;
 import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.data.StringData;
 import org.apache.flink.util.Collector;
-import org.apache.iceberg.*;
+import org.apache.iceberg.FileFormat;
+import org.apache.iceberg.PartitionSpec;
+import org.apache.iceberg.Table;
+import org.apache.iceberg.TableProperties;
 import org.apache.iceberg.catalog.Catalog;
 import org.apache.iceberg.catalog.TableIdentifier;
 import org.apache.iceberg.flink.CatalogLoader;
@@ -32,7 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UpsertIcebergTableStreamDemo_2 {
+public class UpsertIcebergTableStreamDemo {
     public static void main(String[] args) throws Exception {
 
         System.setProperty("HADOOP_USER_NAME", "root");
@@ -59,9 +63,9 @@ public class UpsertIcebergTableStreamDemo_2 {
         // set mode to exactly-once (this is the default)
         env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         // make sure 500 ms of progress happen between checkpoints
-        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(3 * 1000);
+        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(10 * 1000);
         // checkpoints have to complete within one minute, or are discarded
-        env.getCheckpointConfig().setCheckpointTimeout(3 * 1000);
+        env.getCheckpointConfig().setCheckpointTimeout(10 * 1000);
         // only two consecutive checkpoint failures are tolerated
         env.getCheckpointConfig().setTolerableCheckpointFailureNumber(3);
         // allow only one checkpoint to be in progress at the same time
@@ -90,12 +94,6 @@ public class UpsertIcebergTableStreamDemo_2 {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
-        // ./kafka-console-producer.sh --bootstrap-server hadoop102:9092 --topic upset_table_topic
-        // {"word":"a","word_type":"0-1"}
-        //  {"word":"b","word_type":"0-1"}
-        //  {"word":"c","word_type":"0-1"}
-        //  {"word":"d","word_type":"0-1"}
-        //  {"word":"e","word_type":"0-1"}
         DataStream<RowData> sourceDataStream = env.fromSource(
                         kafkaSource,
                         WatermarkStrategy.noWatermarks(),
@@ -111,7 +109,7 @@ public class UpsertIcebergTableStreamDemo_2 {
                             WordCount wordCount = JSON.parseObject(value, WordCount.class);
                             GenericRowData rowData = new GenericRowData(2);
                             rowData.setField(0, StringData.fromString(wordCount.getWord()));
-                            rowData.setField(1, StringData.fromString(wordCount.getWord_type()));
+                            rowData.setField(1, wordCount.getCnt());
                             out.collect(rowData);
                         } catch (Exception e) {
                             System.out.println("source data " + value + " is not valid");
@@ -136,7 +134,7 @@ public class UpsertIcebergTableStreamDemo_2 {
 
         org.apache.iceberg.Schema schema = new org.apache.iceberg.Schema(
                 Types.NestedField.required(1, "word", Types.StringType.get()),
-                Types.NestedField.optional(3, "word_type", Types.StringType.get())
+                Types.NestedField.optional(2, "cnt", Types.IntegerType.get())
         );
 
         Catalog catalog = catalogLoader.loadCatalog();
@@ -144,17 +142,7 @@ public class UpsertIcebergTableStreamDemo_2 {
         Table table;
         if (catalog.tableExists(tableIdentifier)) {
             table = catalog.loadTable(tableIdentifier);
-            System.out.println("Loaded existing table: " + tableIdentifier);
-
-            // 更新表结构
-            Schema originTableSchema = table.schema();
-            Types.NestedField wordType = originTableSchema.findField("word_type");
-            if (wordType == null) {
-                table.updateSchema().addColumn("word_type", Types.StringType.get()).commit();
-            }
-
-            System.out.println("Updated table schema: " + table.schema());
-
+            System.out.println("Loaded existing table: " + tableIdentifier + " ,schema: " + table.schema().asStruct());
         } else {
             // 创建表属性
             Map<String, String> properties = new HashMap<>(3);
@@ -170,7 +158,7 @@ public class UpsertIcebergTableStreamDemo_2 {
                     PartitionSpec.unpartitioned(),
                     properties
             );
-            System.out.println("Created new table: " + tableIdentifier);
+            System.out.println("Created new table: " + tableIdentifier + " ,schema: " + table.schema().asStruct());
         }
         TableLoader tableLoader = TableLoader.fromCatalog(catalogLoader, tableIdentifier);
 
@@ -182,6 +170,6 @@ public class UpsertIcebergTableStreamDemo_2 {
                 .equalityFieldColumns(Collections.singletonList("word"))
                 .append();
 
-        env.execute("UpsertIcebergTableStreamDemo_2");
+        env.execute("UpsertIcebergTableStreamDemo");
     }
 }

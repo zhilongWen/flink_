@@ -1,4 +1,4 @@
-package com.at.iceberg.demo;
+package com.at.iceberg.demo.update;
 
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
@@ -9,18 +9,18 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
-public class UpsetIcebergTableReadDemo {
+public class UpsetIcebergTableDemo_2 {
     public static void main(String[] args) throws Exception {
 
         System.setProperty("HADOOP_USER_NAME", "root");
 
         Configuration defaultConfig = new Configuration();
-        defaultConfig.setString("rest.bind-port", "8082");
+        defaultConfig.setString("rest.bind-port", "8081");
         StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(defaultConfig);
         EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 
-        env.setParallelism(1);
+        env.setParallelism(2);
 
         env.setRestartStrategy(
                 org.apache.flink.api.common.restartstrategy.RestartStrategies.fixedDelayRestart(
@@ -36,9 +36,9 @@ public class UpsetIcebergTableReadDemo {
         // set mode to exactly-once (this is the default)
         env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         // make sure 500 ms of progress happen between checkpoints
-        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(10 * 1000);
+        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(3 * 1000);
         // checkpoints have to complete within one minute, or are discarded
-        env.getCheckpointConfig().setCheckpointTimeout(10 * 1000);
+        env.getCheckpointConfig().setCheckpointTimeout(3 * 1000);
         // only two consecutive checkpoint failures are tolerated
         env.getCheckpointConfig().setTolerableCheckpointFailureNumber(3);
         // allow only one checkpoint to be in progress at the same time
@@ -60,17 +60,60 @@ public class UpsetIcebergTableReadDemo {
         env.configure(checkpointConfig);
 
 
-        tableEnv.executeSql("create catalog hadoop_catalog with (\n"
+        // ./kafka-console-producer.sh --bootstrap-server hadoop102:9092 --topic upset_table_topic
+        // {"word":"a","cnt":1}
+        //  {"word":"b","cnt":1}
+        //  {"word":"c","cnt":1}
+        //  {"word":"d","cnt":1}
+        //  {"word":"e","cnt":1}
+        //
+        //
+        //  {"word":"a","cnt":10}
+        //  {"word":"e","cnt":11}
+        String sourceSQL = "CREATE TABLE if not exists default_catalog.default_database.kafka_source_tbl(\n"
+                + "    word STRING,\n"
+                + "    cnt INT,\n"
+                + "    word_type STRING\n"
+                + ") \n"
+                + "WITH \n"
+                + "(\n"
+                + "    'connector' = 'kafka',\n"
+                + "    'topic' = 'upset_table_topic',\n"
+                + "    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',\n"
+                + "    'properties.group.id' = 'UpsetIcebergTableDemo_2',\n"
+                + "    'scan.startup.mode' = 'latest-offset',\n"
+                + "    'format' = 'json',\n"
+                + "    'json.ignore-parse-errors' = 'true'\n"
+                + ")";
+
+        String catalog = "create catalog hadoop_catalog with (\n"
                 + "  'type'='iceberg',\n"
                 + "  'catalog-type'='hadoop',\n"
                 + "  'warehouse'='hdfs://10.211.55.102:8020/user/hive/warehouse/iceberg_db.db/iceberg_hadoop',\n"
                 + "  'property-version'='1'\n"
-                + ")");
+                + ")";
+        tableEnv.executeSql(catalog);
 
         tableEnv.executeSql("use catalog hadoop_catalog");
+        String ddl = "CREATE TABLE if not exists word_count_tbl (\n"
+                + "  word STRING UNIQUE COMMENT 'unique id',\n"
+                + "  cnt INT  ,\n"
+                + "  word_type STRING  ,\n"
+                + "  PRIMARY KEY(word) NOT ENFORCED\n"
+                + ") with (\n"
+                + "  'format-version'='2', \n"
+                + "  'write.upsert.enabled'='true'\n"
+                + ")";
+        tableEnv.executeSql(ddl);
 
-        tableEnv.executeSql("show tables").print();
+        tableEnv.executeSql("use catalog default_catalog");
+        tableEnv.executeSql(sourceSQL);
 
-        tableEnv.executeSql("SELECT * FROM word_count_tbl").print();
+        tableEnv.executeSql("use catalog hadoop_catalog");
+        String sinkSQL = "insert into word_count_tbl select word,cnt,word_type from default_catalog.default_database.kafka_source_tbl";
+        tableEnv.executeSql(sinkSQL);
+
+
+        env.execute();
     }
 }
