@@ -1,4 +1,4 @@
-package com.at.iceberg.demo.update;
+package com.at.iceberg.demo.merge_into;
 
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
@@ -9,18 +9,16 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
-public class UpsetIcebergTableReadDemo {
+public class InitIcebergTableDemo {
     public static void main(String[] args) throws Exception {
 
         System.setProperty("HADOOP_USER_NAME", "root");
 
         Configuration defaultConfig = new Configuration();
-        defaultConfig.setString("rest.bind-port", "8083");
+        defaultConfig.setString("rest.bind-port", "8081");
         StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(defaultConfig);
         EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
-
-        env.setParallelism(1);
 
         env.setRestartStrategy(
                 org.apache.flink.api.common.restartstrategy.RestartStrategies.fixedDelayRestart(
@@ -71,6 +69,22 @@ public class UpsetIcebergTableReadDemo {
 
         tableEnv.executeSql("show tables").print();
 
-        tableEnv.executeSql("SELECT * FROM hadoop_catalog.test_db.word_stats").print();
+        tableEnv.executeSql("USE CATALOG hadoop_catalog");
+        tableEnv.executeSql("USE test_db");
+
+        // 创建支持并发写入的 Iceberg 表
+        tableEnv.executeSql("CREATE TABLE hadoop_catalog.test_db.word_stats (" +
+                "word STRING PRIMARY KEY NOT ENFORCED," +  // 定义主键
+                "cnt BIGINT," +
+                "word_type STRING" +
+                ") WITH (" +
+                "'format-version' = '2'," +                 // 使用 Iceberg v2 格式
+                "'write.upsert.enabled' = 'true'," +        // 启用 UPSERT 模式
+                "'write.distribution-mode' = 'hash'," +     // 使用哈希分布以提高并发
+                "'write.merge-schema' = 'true'" +           // 允许模式演变
+                ")");
+
+        tableEnv.executeSql("show tables").print();
+
     }
 }

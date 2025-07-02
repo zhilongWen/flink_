@@ -1,4 +1,4 @@
-package com.at.iceberg.demo.update;
+package com.at.iceberg.demo.merge_into;
 
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
@@ -9,18 +9,17 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
-public class UpsetIcebergTableReadDemo {
+public class MultiStreamWrite_A {
     public static void main(String[] args) throws Exception {
 
         System.setProperty("HADOOP_USER_NAME", "root");
 
         Configuration defaultConfig = new Configuration();
-        defaultConfig.setString("rest.bind-port", "8083");
+        defaultConfig.setString("rest.bind-port", "8081");
         StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(defaultConfig);
         EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
-
-        env.setParallelism(1);
+        env.setParallelism(2);
 
         env.setRestartStrategy(
                 org.apache.flink.api.common.restartstrategy.RestartStrategies.fixedDelayRestart(
@@ -60,17 +59,39 @@ public class UpsetIcebergTableReadDemo {
         env.configure(checkpointConfig);
 
 
-        tableEnv.executeSql("create catalog hadoop_catalog with (\n"
+        // {"word":"a","cnt":110}
+        // {"word":"c","cnt":10}
+        // {"word":"g","cnt":1}
+        String sourceSQL = "CREATE TABLE if not exists default_catalog.default_database.source_a(\n"
+                + "    word STRING,\n"
+                + "    cnt INT\n"
+                + ") \n"
+                + "WITH \n"
+                + "(\n"
+                + "    'connector' = 'kafka',\n"
+                + "    'topic' = 'upset_table_topic',\n"
+                + "    'properties.bootstrap.servers' = 'hadoop102:9092,hadoop103:9092,hadoop104:9092',\n"
+                + "    'properties.group.id' = 'MultiStreamWrite_A',\n"
+                + "    'scan.startup.mode' = 'latest-offset',\n"
+                + "    'format' = 'json',\n"
+                + "    'json.ignore-parse-errors' = 'true'\n"
+                + ")";
+
+        tableEnv.executeSql(sourceSQL);
+
+        String catalog = "create catalog hadoop_catalog with (\n"
                 + "  'type'='iceberg',\n"
                 + "  'catalog-type'='hadoop',\n"
                 + "  'warehouse'='hdfs://10.211.55.102:8020/user/hive/warehouse/iceberg_db.db/iceberg_hadoop',\n"
                 + "  'property-version'='1'\n"
-                + ")");
+                + ")";
+        tableEnv.executeSql(catalog);
 
-        tableEnv.executeSql("use catalog hadoop_catalog");
+        tableEnv.executeSql("USE CATALOG hadoop_catalog");
+        tableEnv.executeSql("USE test_db");
+        tableEnv.executeSql("INSERT INTO hadoop_catalog.test_db.word_stats " +
+                "SELECT word, cnt, CAST(NULL AS STRING) " +
+                "FROM default_catalog.default_database.source_a");
 
-        tableEnv.executeSql("show tables").print();
-
-        tableEnv.executeSql("SELECT * FROM hadoop_catalog.test_db.word_stats").print();
     }
 }
