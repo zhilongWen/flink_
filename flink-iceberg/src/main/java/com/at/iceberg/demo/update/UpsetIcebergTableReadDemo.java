@@ -71,6 +71,6 @@ public class UpsetIcebergTableReadDemo {
 
         tableEnv.executeSql("show tables").print();
 
-        tableEnv.executeSql("SELECT * FROM hadoop_catalog.test_db.word_stats").print();
+        tableEnv.executeSql("SELECT * FROM hadoop_catalog.test_db.user_actions").print();
     }
 }
