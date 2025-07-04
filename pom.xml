@@ -20,6 +20,7 @@
         <module>flink-connectors/hive-connector</module>
         <module>flink-iceberg</module>
         <module>flink-iceberg-1.16-1.1.0</module>
+        <module>flink-paimon</module>
     </modules>
 
     <properties>
