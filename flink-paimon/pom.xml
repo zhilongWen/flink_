@@ -32,7 +32,8 @@ under the License.
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <flink.version>1.16.0</flink.version>
+<!--        <flink.version>1.16.0</flink.version>-->
+        <flink.version>1.17.0</flink.version>
         <target.java.version>1.8</target.java.version>
         <scala.binary.version>2.12</scala.binary.version>
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
@@ -206,12 +207,21 @@ under the License.
             <version>${flink.version}</version>
         </dependency>
 
+<!--        &lt;!&ndash; https://mvnrepository.com/artifact/org.apache.paimon/paimon-flink-1.16 &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.paimon</groupId>-->
+<!--            <artifactId>paimon-flink-1.16</artifactId>-->
+<!--            <version>1.2.0</version>-->
+<!--            <systemPath>${consumer.libs}/paimon-flink-1.16-1.2.0.jar</systemPath>-->
+<!--            <scope>system</scope>-->
+<!--        </dependency>-->
+
         <!-- https://mvnrepository.com/artifact/org.apache.paimon/paimon-flink-1.16 -->
         <dependency>
             <groupId>org.apache.paimon</groupId>
-            <artifactId>paimon-flink-1.16</artifactId>
+            <artifactId>paimon-flink-1.17</artifactId>
             <version>1.2.0</version>
-            <systemPath>${consumer.libs}/paimon-flink-1.16-1.2.0.jar</systemPath>
+            <systemPath>${consumer.libs}/paimon-flink-1.17-1.2.0.jar</systemPath>
             <scope>system</scope>
         </dependency>
 

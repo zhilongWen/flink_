@@ -15,6 +15,7 @@ trait CommonSuite {
     defaultConfig.setString("rest.bind-port", "8081")
     val env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(defaultConfig)
     val settings = EnvironmentSettings.newInstance.inStreamingMode.build
+//    val settings = EnvironmentSettings.newInstance.inBatchMode().build
     val tableEnv = StreamTableEnvironment.create(env, settings)
 
     // 设置 Hive 元数据相关参数// 设置 Hive 元数据相关参数
