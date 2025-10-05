@@ -88,7 +88,7 @@
               <transformers>
                 <transformer />
                 <transformer>
-                  <mainClass>com.at.DataStreamJob</mainClass>
+                  <mainClass>com.at.featurehub.DataStreamJob</mainClass>
                 </transformer>
               </transformers>
             </configuration>
