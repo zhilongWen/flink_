@@ -31,14 +31,19 @@ under the License.
     <name>flink-featurehub</name>
 
     <properties>
+        <java.version>17</java.version>
+        <target.java.version>${java.version}</target.java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <flink.version>1.20.1</flink.version>
-        <target.java.version>1.7</target.java.version>
-        <scala.binary.version>2.12</scala.binary.version>
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
-        <log4j.version>2.17.1</log4j.version>
 
+
+        <scala.version>2.12.17</scala.version>
+        <scala.binary.version>2.12</scala.binary.version>
+        <scala.scope>compile</scala.scope>
+        <flink.version>1.20.1</flink.version>
+
+        <log4j.version>2.17.1</log4j.version>
         <junit5.version>5.8.2</junit5.version>
         <assertj.version>3.23.1</assertj.version>
     </properties>
@@ -58,6 +63,35 @@ under the License.
     </repositories>
 
     <dependencies>
+        <!-- scala -->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-actors</artifactId>
+            <version>2.11.8</version>
+            <scope>${scala.scope}</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-reflect</artifactId>
+            <version>${scala.version}</version>
+            <scope>${scala.scope}</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scala.version}</version>
+            <scope>${scala.scope}</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-compiler</artifactId>
+            <version>${scala.version}</version>
+            <scope>${scala.scope}</scope>
+        </dependency>
+
         <!-- Apache Flink dependencies -->
         <!-- These dependencies are provided, because they should not be packaged into the JAR file. -->
         <dependency>
